@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!-- namespace用于java代码调用时识别指定xml的mapper文件 -->
+<mapper namespace="task">
+
+	<update id="task.updateTask" parameterType="ArrayList">
+        UPDATE d_ec_new_statistics.t_ec_autojob_autotask t
+
+        SET
+
+         t.state = #{state},
+
+         t.lastEndDate=#{lastEndDate}
+
+        Where t.taskPath = #{taskPath}
+	</update>
+
+</mapper>

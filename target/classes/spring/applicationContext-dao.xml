@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+
+    <bean id="sqlSessionFactoryStatic" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="configLocation" value="classpath:mybatis/SqlMapConfig.xml"></property>
+        <property name="dataSource" ref="staticDataSource" />
+    </bean>
+
+    <bean id="sqlSessionFactoryBase" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="configLocation" value="classpath:mybatis/SqlMapConfig.xml"></property>
+        <property name="dataSource" ref="dataSourceBase" />
+    </bean>
+
+    <bean id="sqlSessionFactoryCrm0" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="configLocation" value="classpath:mybatis/SqlMapConfig.xml"></property>
+        <property name="dataSource" ref="dataSourceCrm0" />
+    </bean>
+
+    <bean id="sqlSessionFactoryCrm1" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="configLocation" value="classpath:mybatis/SqlMapConfig.xml"></property>
+        <property name="dataSource" ref="dataSourceCrm1" />
+    </bean>
+
+    <bean id="sqlSessionFactoryCrm2" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="configLocation" value="classpath:mybatis/SqlMapConfig.xml"></property>
+        <property name="dataSource" ref="dataSourceCrm2" />
+    </bean>
+
+    <bean id="sqlSessionFactoryCrm3" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="configLocation" value="classpath:mybatis/SqlMapConfig.xml"></property>
+        <property name="dataSource" ref="dataSourceCrm3" />
+    </bean>
+
+
+
+
+    <bean id="sqlSessionStatic" class="com.ec.singleOut.core.EcIbatisSqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactoryStatic" />
+    </bean>
+
+    <bean id="sqlSessionBase" class="com.ec.singleOut.core.EcIbatisSqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactoryBase" />
+    </bean>
+
+    <bean id="sqlSessionCrm0" class="com.ec.singleOut.core.EcIbatisSqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactoryCrm0" />
+    </bean>
+
+    <bean id="sqlSessionCrm1" class="com.ec.singleOut.core.EcIbatisSqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactoryCrm1" />
+    </bean>
+
+    <bean id="sqlSessionCrm2" class="com.ec.singleOut.core.EcIbatisSqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactoryCrm2" />
+    </bean>
+
+    <bean id="sqlSessionCrm3" class="com.ec.singleOut.core.EcIbatisSqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactoryCrm3" />
+    </bean>
+
+
+</beans>

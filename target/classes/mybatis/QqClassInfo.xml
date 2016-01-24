@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!-- namespace用于java代码调用时识别指定xml的mapper文件 -->
+<mapper namespace="qqClassInfo">
+    <update id="qqClassInfo.deleteQQinfo">
+
+        update d_ec_qq.t_qq_class_info set f_crm_id=0 where f_crm_id IN
+
+        <foreach collection="crmIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        
+    </update>
+</mapper>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!-- namespace用于java代码调用时识别指定xml的mapper文件 -->
+<mapper namespace="loseRecordCrm">
+    <update id="loseRecordCrm.updateLoseRecordCrm">
+        REPLACE
+        ${tableName}(f_crm_id,f_user_id,f_corp_id,f_type,f_last_contact_time,f_lose_time,f_create_Time)
+        values
+        <foreach collection="loseRecords" item="item" index="index" separator="," >
+            (
+            #{item.f_crm_id},
+            #{item.f_user_id},
+            #{item.f_corp_id},
+            #{item.f_type},
+            #{item.f_last_contact_time},
+            #{item.f_lose_time},
+            #{item.f_createTime}
+            )
+        </foreach>
+    </update>
+</mapper>

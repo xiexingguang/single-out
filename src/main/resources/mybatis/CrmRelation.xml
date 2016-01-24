@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!-- namespace用于java代码调用时识别指定xml的mapper文件 -->
+<mapper namespace="crmRelation">
+    <update id="crmRelation.updateCrmRelation">
+       update d_ec_crm.t_crm_relation set f_last_user_id=f_user_id, f_user_id=0, f_friend_id=0 ,f_qq1_id='', f_wxopenid=''
+								where f_corp_id=#{corpId}
+							    and
+						        f_crm_id
+							   in
+                            <foreach collection="crmIds" index="index" item="item" open="(" separator="," close=")">
+                                #{item}
+                            </foreach>
+    </update>
+
+    <select id="crmRelation.selectCrmNotSetTag" resultType="long">
+        SELECT
+        f_crm_id crmId
+        FROM
+        d_ec_crm.t_crm_relation
+
+        WHERE
+        <if test="corpId!=null and corpId!=''">
+            f_corp_id=#{corpId} AND
+        </if>
+
+        f_crm_id
+        in
+        <foreach collection="crmIds" index="index" item="item" open="(" separator="," close=")">
+            #{item.f_crm_id}
+        </foreach>
+
+        AND
+
+        f_crm_classid=0
+
+    </select>
+
+</mapper>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+
+	<context:annotation-config />
+	<!-- 开启事务注解驱动 -->  
+    <tx:annotation-driven />
+    <context:component-scan base-package="com.ec.singleOut.dao" />
+    <context:component-scan base-package="com.ec.singleOut.thrift.client" />
+    <context:component-scan base-package="com.ec.singleOut.nsq" />
+    <context:component-scan base-package="com.ec.singleOut.service" />
+    <context:component-scan base-package="com.ec.singleOut.redis" />
+    <context:component-scan base-package="com.ec.singleOut.core" />
+    <!--  <context:component-scan base-package="com.ec.commons.server.jetty*" />-->
+	<import resource="applicationContext-commons.xml" />
+	<import resource="applicationContext-datasource.xml" />
+	<import resource="applicationContext-memcached.xml" />
+    <import resource="applicationContext-redis.xml" />
+    <import resource="applicationContext-dao.xml" />
+    <import resource="applicationContext-dubbo.xml" />
+
+</beans>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!-- namespace用于java代码调用时识别指定xml的mapper文件 -->
+<mapper namespace="crmDetail">
+
+    <resultMap id="crmDetailBean" type="com.ec.singleOut.entity.CrmDetailEntity">
+        <result property="f_crm_id" column="crmId"/>
+        <result property="f_corp_id" column="corpId"/>
+        <result property="f_user_id" column="userId"/>
+        <result property="f_create_Time" column="createTime"/>
+    </resultMap>
+
+
+	<select id="crmDetail.findCrmDetailsByCorpId" resultMap="crmDetailBean">
+		SELECT
+		f_crm_id crmId,f_create_time createTime,f_user_id userId,f_corp_id corpId
+		FROM
+		d_ec_crm.t_eccrm_detail
+		WHERE
+        <if test="corpId!=null and corpId!=''">
+		f_corp_id=#{corpId} AND
+        </if>
+		f_user_id!=0;
+	</select>
+
+    <select id="crmDetail.findCrmDetailByCorpIdAndCrmId" resultMap="crmDetailBean">
+        SELECT
+        f_crm_id crmId,f_create_time createTime,f_user_id userId,f_corp_id corpId
+        FROM
+        d_ec_crm.t_eccrm_detail
+        WHERE
+        f_corp_id=#{corpId}
+
+       AND f_crm_id = #{crmId}
+
+       AND f_user_id > 0
+    </select>
+
+    <update id="crmDetail.updateCrmDetailsByCrmIds">
+
+        update d_ec_crm.t_eccrm_detail set
+
+        f_user_id=0,
+
+        f_company_id=0,
+
+        f_modify_time= #{contactTime},
+
+         f_contact_time=  #{contactTime}
+
+         <if test = "isNew=='false'">
+         , f_qq=''
+        </if>
+
+         where
+          f_corp_id=#{corpId}
+          and
+
+          f_crm_id in
+
+        <foreach collection="crmIds" index="index" item="item" open="(" separator="," close=")">
+
+            #{item}
+
+        </foreach>
+
+        and f_user_id!=0;
+
+    </update>
+
+
+</mapper>

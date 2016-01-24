@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <!-- 给bean取别名用在mapping文件中 -->
+    <typeAliases>
+        <typeAlias type="com.ec.singleOut.entity.CrmLoseRuleEntity" alias="crmLoseRule" />
+        <typeAlias type="com.ec.singleOut.entity.LoseRecordEntity" alias="loseRecord" />
+    </typeAliases>
+
+    <!-- 这里可以写多个实体的映射文件 -->
+
+    <mappers>
+        <mapper resource="mybatis/CrmContactTime.xml" />
+        <mapper resource="mybatis/CrmLoseRule.xml" />
+        <mapper resource="mybatis/CrmDetail.xml" />
+        <mapper resource="mybatis/CorpVplanMap.xml"/>
+        <mapper resource="mybatis/CrmRelation.xml"/>
+        <mapper resource="mybatis/CrmShareRelation.xml"/>
+        <mapper resource="mybatis/CrmCorpRelation.xml"/>
+        <mapper resource="mybatis/QqClassInfo.xml"/>
+        <mapper resource="mybatis/CrmPlanDetail.xml"/>
+        <mapper resource="mybatis/CrmChange.xml"/>
+        <mapper resource="mybatis/CrmChangeLog.xml"/>
+        <mapper resource="mybatis/CrmChangeOnce.xml"/>
+        <mapper resource="mybatis/CrmDetailClass.xml"/>
+        <mapper resource="mybatis/Task.xml" />
+        <mapper resource="mybatis/NSQTaskMap.xml" />
+        <mapper resource="mybatis/CrmClass.xml" />
+        <mapper resource="mybatis/CrmLoseRecord.xml" />
+        <!--
+        <mapper resource="mybatis/CrmCorpDetail.xml" />
+        <mapper resource="mybatis/CrmDetail.xml" />
+        <mapper resource="mybatis/CrmDetailClass.xml" />
+        <mapper resource="mybatis/CrmLoseRule.xml" />
+        <mapper resource="mybatis/CrmRelation.xml" />
+        <mapper resource="mybatis/CrmShareRelation.xml" />
+        <mapper resource="mybatis/NSQTaskMap.xml" />
+
+
+         -->
+    </mappers>
+</configuration>

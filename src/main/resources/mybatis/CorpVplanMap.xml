@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!-- namespace用于java代码调用时识别指定xml的mapper文件 -->
+<mapper namespace="corpVplan">
+
+	<select id="getByCorpId" resultType="com.ec.singleOut.bean.CorpVplan">
+		SELECT
+		f_corp_id
+		FROM
+		d_ec_corp.t_corp_vplan
+		WHERE
+		f_corp_id=#{corpId}
+	</select>
+
+</mapper>

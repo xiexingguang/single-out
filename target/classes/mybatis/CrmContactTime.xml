@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!-- namespace用于java代码调用时识别指定xml的mapper文件 -->
+
+
+<mapper namespace="contactTime">
+
+    <resultMap id="crmContactTime" type="com.ec.singleOut.entity.CrmContactTimeEntity">
+        <result property="f_crm_id" column="f_crm_id"/>
+        <result property="f_corp_id" column="f_corp_id"/>
+        <result property="f_type" column="f_type"/>
+        <result property="f_contact_time" column="f_contact_time"/>
+    </resultMap>
+
+
+	<insert id="batchSave" parameterType="ArrayList">
+		INSERT into d_ec_sys.t_nsq_task (
+		f_topic_name,
+		f_corp_id,
+		f_user_id,
+		f_message,
+		f_create_time,
+		f_from
+		) 
+		VALUES
+		<foreach collection="list" item="item" index="index"
+            separator=",">
+            (
+		        #{item.f_topic_name},
+		        #{item.f_corp_id},
+		        #{item.f_user_id},
+		        #{item.f_message},
+		        #{item.f_create_time},
+		        #{item.f_from}
+            )
+        </foreach>
+	</insert>
+
+
+
+
+   <select id="findNewestCrmContactTime" resultMap="crmContactTime">
+        select  * from  ${tableName}
+
+         where f_contact_time in (select max(f_contact_time)
+
+         from ${tableName} GROUP BY f_crm_id )
+
+       <if test="type!=null and type!=''">
+            and  f_type in ( ${type} )
+       </if>
+
+          and f_corp_id = #{corpId} GROUP BY f_crm_id
+
+   </select>
+
+
+
+</mapper>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!-- namespace用于java代码调用时识别指定xml的mapper文件 -->
+<mapper namespace="crmPlanDetail">
+    <update id="crmPlanDetail.updateCrmPlanDetail">
+        UPDATE d_ec_crm.t_crm_plan_detail as p,
+        d_ec_crm.t_plan_lot AS l
+        SET l.f_change_time=sysdate(),
+        f_state=2
+        WHERE
+        p.f_corp_id=#{corpId}
+         and p.f_crm_id
+         in
+        <foreach collection="crmIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+          AND
+          l.f_id=p.f_lot_id
+          and l.f_isexe=0;
+    </update>
+
+    <delete id="crmPlanDetail.deletCrmPlanDetail">
+        delete
+        FROM
+        d_ec_crm.t_crm_plan_detail
+        where  f_corp_id=#{corpId}
+        and
+        f_crm_id
+        in
+        <foreach collection="crmIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and f_isexe=0;
+    </delete>
+
+</mapper>

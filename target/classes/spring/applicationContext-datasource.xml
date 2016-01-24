@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+
+    <bean id="staticDataSource" class="org.apache.commons.dbcp.BasicDataSource"
+          destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}" />
+        <property name="url" value="${static.jdbc.url}" />
+        <property name="username" value="${static.jdbc.username}" />
+        <property name="password" value="${static.jdbc.password}" />
+        <property name="initialSize" value="${jdbc.initialSize}" />
+        <property name="maxActive" value="${jdbc.maxActive}" />
+        <property name="minIdle" value="${jdbc.minIdle}" />
+        <property name="maxIdle" value="${jdbc.maxIdle}" />
+        <property name="maxWait" value="${jdbc.maxWaitMillis}" />
+        <property name="logAbandoned" value="${jdbc.logAbandoned}" />
+        <property name="removeAbandoned" value="${jdbc.removeAbandoned}" />
+        <property name="removeAbandonedTimeout" value="${jdbc.removeAbandonedTimeout}" />
+        <property name="testOnBorrow" value="${jdbc.testOnBorrow}" />
+        <property name="testWhileIdle" value="${jdbc.testWhileIdle}" />
+        <property name="timeBetweenEvictionRunsMillis" value="${jdbc.timeBetweenEvictionRunsMillis}" />
+        <property name="numTestsPerEvictionRun" value="${jdbc.numTestsPerEvictionRun}" />
+        <property name="minEvictableIdleTimeMillis" value="${jdbc.minEvictableIdleTimeMillis}" />
+        <property name="validationQuery" value="${jdbc.validationQuery}" />
+        <property name="defaultAutoCommit" value="${jdbc.defaultAutoCommit}" />
+    </bean>
+
+
+    <bean id="commonDataSourceBase" abstract="true"
+          class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+        <property name="initialSize" value="${jdbc.initialSize}" />
+        <property name="maxActive" value="${jdbc.maxActive}" />
+        <property name="minIdle" value="${jdbc.minIdle}" />
+        <property name="maxIdle" value="${jdbc.maxIdle}" />
+        <property name="maxWait" value="${jdbc.maxWaitMillis}" />
+        <property name="logAbandoned" value="${jdbc.logAbandoned}" />
+        <property name="removeAbandoned" value="${jdbc.removeAbandoned}" />
+        <property name="removeAbandonedTimeout" value="${jdbc.removeAbandonedTimeout}" />
+        <property name="testOnBorrow" value="${jdbc.testOnBorrow}" />
+        <property name="testWhileIdle" value="${jdbc.testWhileIdle}" />
+        <property name="timeBetweenEvictionRunsMillis" value="${jdbc.timeBetweenEvictionRunsMillis}" />
+        <property name="numTestsPerEvictionRun" value="${jdbc.numTestsPerEvictionRun}" />
+        <property name="minEvictableIdleTimeMillis" value="${jdbc.minEvictableIdleTimeMillis}" />
+        <property name="validationQuery" value="${jdbc.validationQuery}" />
+        <property name="defaultAutoCommit" value="${jdbc.defaultAutoCommit}" />
+    </bean>
+
+    <bean id="dataSourceBase" parent="commonDataSourceBase">
+        <property name="url" value="${base.jdbc.url}" />
+    </bean>
+
+    <bean id="dataSourceCrm0" parent="commonDataSourceBase">
+        <property name="url" value="${crm0.jdbc.url}" />
+    </bean>
+
+    <bean id="dataSourceCrm1" parent="commonDataSourceBase">
+        <property name="url" value="${crm1.jdbc.url}" />
+    </bean>
+
+    <bean id="dataSourceCrm2" parent="commonDataSourceBase">
+        <property name="url" value="${crm2.jdbc.url}" />
+    </bean>
+
+    <bean id="dataSourceCrm3" parent="commonDataSourceBase">
+        <property name="url" value="${crm3.jdbc.url}" />
+    </bean>
+
+</beans>
