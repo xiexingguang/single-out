@@ -998,9 +998,13 @@ public class DiaodanServiceImpl implements DiaodanService {
     private void dealCrm2ES(long corpID, List<Long> crmIds) throws InterruptedException{
 
         try {
+            if (crmIds == null || crmIds.size() == 0) {
+                LOG.warn("write 2 es ,corpId :" + corpID +"have no lose crmIds");
+                return;
+            }
             if (client == null) {
                 if (client == null) {
-                    for(int i=0; i<3;i++){
+                    for (int i = 0; i < 3; i++) {
                         client = thriftClient.getThriftClient();  //初始化thrift,重试3次，有可能是网络问题
                         if (client != null) {
                             break;
