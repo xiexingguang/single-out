@@ -193,12 +193,13 @@ public class DiaodanServiceImpl implements DiaodanService {
 
         // 在detail表中,不在contactTime表里的crm，并且设置了掉单规则1
         if (contact1 != 0) {
-            List<CrmDetailEntity> notIncontactTime = findNotIncontactTimeTableCrmId(corpid,contact_type);
+            List<CrmDetailEntity> notIncontactTime = findNotIncontactTimeTableCrmId(corpid, null);   // 过滤了只在detail表里面，而不在contact_time表里
             for (CrmDetailEntity entity : notIncontactTime) {
                 final String stringngCreateTime = entity.getF_create_Time();
                 final String lose_time = DateUtil.addDateOfDay(stringngCreateTime, contact1);
                 final long usrs_id = entity.getF_user_id();
                 long day2lose = DateUtil.convertStringDate2LongDate(lose_time) - currentTime;
+
                 //log
                 LOG.info("规则1，企业id ：" + corpid  +" , 客户id为 ："+entity.getF_crm_id()+"===========> 掉单时间 ==》" + lose_time );
 
@@ -245,7 +246,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                     long day2lose = DateUtil.convertStringDate2LongDate(lose_time) - currentTime;
 
                     //log
-                    LOG.info("规则1，企业id ：" + corpid  +" , 客户id为 ："+crmContactTimeEntity.getF_crm_id()+"===========> 掉单时间 ==》" + lose_time );
+                    LOG.info("规则2，3 企业id ：" + corpid  +" , 客户id为 ："+crmContactTimeEntity.getF_crm_id()+"===========> 掉单时间 ==》" + lose_time );
 
                     if (timeInterval != 0) {           // 查询的是即将timeInterval时间间隔掉单的crmId
                         final String rember_time = DateUtil.removeDateOfHour(lose_time, timeInterval);
@@ -273,17 +274,44 @@ public class DiaodanServiceImpl implements DiaodanService {
                 }
             }//end if contact2 != 0
 
-         // 筛选数据，比如去重，以及 筛选，条件中有自定义标签的，即f_tag_set !=""的
+
+        //企业下的，crmid 联系方式 全部是无效联系，只针对已掉单的，处理已掉单，在 contact_time表里，全部是无效的联系方式的crmid也需要掉单
+        if (timeInterval == 0) {
+            LOG.info("只针对已掉单的，筛选crmid，没有任何有效联系方式，筛选前crmids size为:" + crmDetailEntities.size());
+            List<CrmContactTimeEntity> contactTimeEntities= crmContactTimeDao.findCrmOpearationTypeNotInEffecitiveCallWays(corpid, contact_type);
+            if (contactTimeEntities != null || contactTimeEntities.size() > 0) {
+                for (CrmContactTimeEntity crmContactTimeEntity : contactTimeEntities) {
+                    long crmid = crmContactTimeEntity.getF_crm_id();
+                    CrmDetailEntity crmDetailEntity = crmDetailDao.findCrmDetailByCorpIdAndCrmId(corpid, crmid);// 查询出来可能为null
+                    if (crmDetailEntity != null) {
+                        crmDetailEntities.add(crmDetailEntity);
+                    }
+                }
+            }
+            LOG.info("只针对已掉单的，筛选crmid，没有任何有效联系方式，筛选后crmids size为:" + crmDetailEntities.size());
+        }
+
+
+
+        // 筛选数据，比如去重，以及 筛选，条件中有自定义标签的，即f_tag_set !=""的
         if (f_tag_set != null && !f_tag_set.equals("")) {
             String[] tags = f_tag_set.split(",");
             List<CrmDetailEntity> noTagsCrm = null;
             boolean isNeedAddNotagCrm = false;
-            //筛选无标签的crmid
+            //首先要从满足掉单条件筛选无标签的crmid，必须在前面。
             for (String tag : tags) {
                 if (tag.equals(DiaodanConstants.NO_TAG)) {  //表示标签规则中设置了无标签
                     isNeedAddNotagCrm = true;
+                    List<Long> noTagsCrmLong = new ArrayList<>();
                     if(crmDetailEntities != null && crmDetailEntities.size() > 0) {
-                        List<Long> noTagsCrmLong = crmRelationDao.searcherCrmIdHasNoSetTag(corpid, crmDetailEntities); // 筛选无标签的crmid
+                        // List<Long> noTagsCrmLong = crmRelationDao.searcherCrmIdHasNoSetTag(corpid, crmDetailEntities); // 筛选无标签的crmid
+                        for (CrmDetailEntity crmDetailEntity : crmDetailEntities) {
+                            long crmid = crmDetailEntity.getF_crm_id();
+                            List<CrmDetailClassEntity> detailClassEntities = crmDetailClassDao.findCrmdetailClasssByCrimId(crmid, corpid);
+                            if (detailClassEntities == null || detailClassEntities.size() == 0) {
+                                noTagsCrmLong.add(crmDetailEntity.getF_crm_id());
+                            }
+                        }
                         noTagsCrm = CollectionUtil.convertLong2CrmDetail(noTagsCrmLong, crmDetailEntities);
                         LOG.info("cropId: " + corpid + " has contains no tag rule,no tag crmIds number  is :" + noTagsCrm.size());
                     }
@@ -291,13 +319,18 @@ public class DiaodanServiceImpl implements DiaodanService {
             }
 
             //标签过滤
+            LOG.info("开始标签过滤筛选，筛选前crmids size为:" + crmDetailEntities.size());
             remvoeDuplicateCrmIdAndfilterNotContainTag(crmDetailEntities, tags);
+            LOG.info("开始标签过滤筛选，筛选后crmids size为:" + crmDetailEntities.size());
 
             //rule设置了无标签客户也需要掉单
             if (isNeedAddNotagCrm && noTagsCrm != null) {
+                LOG.info("开始无标签筛选，筛选前crmids size为:" + crmDetailEntities.size());
                 crmDetailEntities.addAll(noTagsCrm);
+                LOG.info("开始无标签筛选，筛选后crmids size为:" + crmDetailEntities.size());
             }
         }
+
 
         return crmDetailEntities;
     }
@@ -334,6 +367,8 @@ public class DiaodanServiceImpl implements DiaodanService {
         pagingExcuteCrmId.dealPageList(ids, configProperties.OPEAATION_NUMBER, (Long) corpid);
         // 分组发送通知，给IM
         UDPClientSocket udpClientSocket = new UDPClientSocket();   // 每次new？ 以后优化
+
+
         try {
             if (udpClientSocket != null) {
                 //发系统通知提醒
@@ -706,6 +741,7 @@ public class DiaodanServiceImpl implements DiaodanService {
      * @return
      */
     public List<CrmDetailEntity> findNotIncontactTimeTableCrmId(long corpId,String  effectiveType) {
+
         //获得在cmrdetail下的crmid，这里面表示的是corpId下的整个cmrdetail数据
         List<CrmDetailEntity> crmDetailEntities = crmDetailDao.findCrmDetailsByCorpId(corpId);
         if (crmDetailEntities == null) {
@@ -718,6 +754,8 @@ public class DiaodanServiceImpl implements DiaodanService {
         }
         // 取差
         List<CrmDetailEntity> copyOfCrm = CollectionUtil.inCrmDetailNotIncontactTime(crmDetailEntities,crmContactTimeEntities);
+
+
         return copyOfCrm;
 
     }
@@ -777,6 +815,7 @@ public class DiaodanServiceImpl implements DiaodanService {
 
         public void pagingDealListCrmid(List collections, Object corpId) throws InterruptedException {
 
+            LOG.info("开始执行pagingDealListCrmid,集合大小为===========》"+collections.size());
             //删除关系eccrm_detail
             dealupdateCrmDetailByCorpId((Long) corpId, collections);
             //更新t_crm_relation

@@ -11,9 +11,19 @@ public class CrmDetailEntity {
     private long f_user_id;
     private String f_create_Time;
     private int f_type;
+    private int f_step;
+
     private String f_new_contact_time;
     private String f_lose_time;
 
+    public int getF_step() {
+        return f_step;
+    }
+
+    public CrmDetailEntity setF_step(int f_step) {
+        this.f_step = f_step;
+        return this;
+    }
 
     public int getF_type() {
         return f_type;

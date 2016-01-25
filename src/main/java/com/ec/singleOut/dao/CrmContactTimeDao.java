@@ -41,8 +41,27 @@ public class CrmContactTimeDao extends  BaseDaoSupport {
         LOG.info("contactTime tableName ===============> " + tableName);
         map.put("tableName", tableName);
         map.put("corpId", coprid);
-        map.put("type", null);
+        map.put("type", effectiveType);
         List<CrmContactTimeEntity> crmContactTimeEntities  = getCrmSqlSession(coprid).selectList("contactTime.findNewestCrmContactTime",map);
+        LOG.debug("crmContactTimeEnity ===="+JSON.toJSON(crmContactTimeEntities));
+        return crmContactTimeEntities;
+    }
+
+
+    public List<CrmContactTimeEntity> findCrmOpearationTypeNotInEffecitiveCallWays(long coprid, String effectiveType) {
+        /**
+         select * from t_crm_contact_time_04 where f_contact_time in
+         (select max(f_contact_time) from t_crm_contact_time_04 GROUP BY f_crm_id )
+         and f_type=2 ORDER BY f_crm_id
+         */
+
+        final String tableName = DbUtil.getContactTimeTableName(coprid, 20);
+        Map<String, Object> map = new HashMap<String, Object>();
+        LOG.info("contactTime tableName ===============> " + tableName);
+        map.put("tableName", tableName);
+        map.put("corpId", coprid);
+        map.put("type", effectiveType);
+        List<CrmContactTimeEntity> crmContactTimeEntities  = getCrmSqlSession(coprid).selectList("contactTime.findNotNewestCrmContactTime",map);
         LOG.debug("crmContactTimeEnity ===="+JSON.toJSON(crmContactTimeEntities));
         return crmContactTimeEntities;
     }

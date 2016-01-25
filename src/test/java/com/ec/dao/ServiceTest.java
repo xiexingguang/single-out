@@ -33,7 +33,7 @@ public class ServiceTest {
         //5003740
    //     System.out.println("===============>size =======>"+diaodanService.searcherWillDeadLineDiaodanCrmIdByCorpId(0, 5009923).size());
        // System.out.println(JSON.toJSONString(diaodanService.searcherWillDeadLineDiaodanCrmIdByCorpId(0, 5003740),true));
-        List<CrmDetailEntity> crmDetailEntities = diaodanService.searcherWillDeadLineDiaodanCrmIdByCorpId(0, 5009923);
+        List<CrmDetailEntity> crmDetailEntities = diaodanService.searcherWillDeadLineDiaodanCrmIdByCorpId(0, 59340);
         System.out.println("size ====>" +crmDetailEntities.size());
         for (CrmDetailEntity crmDetailEntity : crmDetailEntities) {
             System.out.print(crmDetailEntity.getF_crm_id() + ",");
@@ -54,7 +54,7 @@ public class ServiceTest {
 
     @Test
     public void testDealLoseCrm() {
-        diaodanService.dealDeadLineDiaodanCrmIdByCorpId(5003740);
+        diaodanService.dealDeadLineDiaodanCrmIdByCorpId(5022954);
     }
 
     @Test
