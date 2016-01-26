@@ -73,14 +73,7 @@ public interface  DiaodanService {
     public void dealDeadLineDiaodan();
 
 
-
-
     public void   dealWillLoseDan();
-
-
-
-
-
 
     /**
      *

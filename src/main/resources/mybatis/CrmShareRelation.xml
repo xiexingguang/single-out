@@ -11,9 +11,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
          delete from d_ec_crm.t_crm_share_relation where
 
-         f_corp_id = #{corpId} AND
+        f_corp_id = #{corpId} AND
 
-         f_crm_id in
+        f_crm_id in
 
         <foreach collection="crmIds" index="index" item="item" open="(" separator="," close=")">
             #{item}
