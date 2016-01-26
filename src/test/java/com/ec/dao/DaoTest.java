@@ -324,7 +324,10 @@ public class DaoTest{
        loseRecordEntities.add(loseRecordEntity);
      loseRecordEntities.add(loseRecordEntity1);
 
-   diaodanDao.updateLoseRecord(loseRecordEntities, 59340);
+  // diaodanDao.updateLoseRecord(loseRecordEntities, 59340);
+
+        diaodanDao.truncateCrm1LoseReocrd();
+
     }
 
 

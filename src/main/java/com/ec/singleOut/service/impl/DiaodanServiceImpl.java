@@ -121,7 +121,7 @@ public class DiaodanServiceImpl implements DiaodanService {
             LOG.error("fail to get the lose corpId from crm1 ",e);
         }
 
-        try {
+      /*  try {
             crm2 = crmLoseRuleDao.searcherRulesFromCrm2();
             LOG.info("crm2 corpid size :" + crm2.size());
             totalcCoprids.addAll(crm2);
@@ -135,7 +135,7 @@ public class DiaodanServiceImpl implements DiaodanService {
             totalcCoprids.addAll(crm3);
         } catch (Exception e) {
             LOG.error("fail to get the lose corpId from crm3 ",e);
-        }
+        }*/
         // log
         LOG.info("total corpid size :" + totalcCoprids.size());
         return totalcCoprids;
@@ -193,13 +193,12 @@ public class DiaodanServiceImpl implements DiaodanService {
 
         // 在detail表中,不在contactTime表里的crm，并且设置了掉单规则1
         if (contact1 != 0) {
-            List<CrmDetailEntity> notIncontactTime = findNotIncontactTimeTableCrmId(corpid, null);   // 过滤了只在detail表里面，而不在contact_time表里
+            List<CrmDetailEntity> notIncontactTime = findNotIncontactTimeTableCrmId(corpid, contact_type);   // 过滤了只在detail表里面，而不在contact_time表里
             for (CrmDetailEntity entity : notIncontactTime) {
                 final String stringngCreateTime = entity.getF_create_Time();
                 final String lose_time = DateUtil.addDateOfDay(stringngCreateTime, contact1);
                 final long usrs_id = entity.getF_user_id();
                 long day2lose = DateUtil.convertStringDate2LongDate(lose_time) - currentTime;
-
                 //log
                 LOG.info("规则1，企业id ：" + corpid  +" , 客户id为 ："+entity.getF_crm_id()+"===========> 掉单时间 ==》" + lose_time );
 
@@ -276,7 +275,7 @@ public class DiaodanServiceImpl implements DiaodanService {
 
 
         //企业下的，crmid 联系方式 全部是无效联系，只针对已掉单的，处理已掉单，在 contact_time表里，全部是无效的联系方式的crmid也需要掉单
-        if (timeInterval == 0) {
+      /*  if (timeInterval == 0) {
             LOG.info("只针对已掉单的，筛选crmid，没有任何有效联系方式，筛选前crmids size为:" + crmDetailEntities.size());
             List<CrmContactTimeEntity> contactTimeEntities= crmContactTimeDao.findCrmOpearationTypeNotInEffecitiveCallWays(corpid, contact_type);
             if (contactTimeEntities != null || contactTimeEntities.size() > 0) {
@@ -289,10 +288,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                 }
             }
             LOG.info("只针对已掉单的，筛选crmid，没有任何有效联系方式，筛选后crmids size为:" + crmDetailEntities.size());
-        }
-
-
-
+        }*/
         // 筛选数据，比如去重，以及 筛选，条件中有自定义标签的，即f_tag_set !=""的
         if (f_tag_set != null && !f_tag_set.equals("")) {
             String[] tags = f_tag_set.split(",");
@@ -330,8 +326,6 @@ public class DiaodanServiceImpl implements DiaodanService {
                 LOG.info("开始无标签筛选，筛选后crmids size为:" + crmDetailEntities.size());
             }
         }
-
-
         return crmDetailEntities;
     }
 
@@ -601,10 +595,9 @@ public class DiaodanServiceImpl implements DiaodanService {
     public void dealDeadLineDiaodan() {
 
        final  List<CrmLoseRuleEntity> totalcCoprids = searcherSetDiaodanCorpIds();
-
         LOG.info("deal lose crm service has been call ,the scan of the total  corpId is : "+totalcCoprids.size());
-        LOG.debug("scan of the corpids is  : " + JSON.toJSONString(totalcCoprids));
 
+        LOG.debug("scan of the corpids is  : " + JSON.toJSONString(totalcCoprids));
         if (client == null) {
             for(int i=0; i<3;i++){
                 client = thriftClient.getThriftClient();  //初始化thrift,重试3次，有可能是网络问题
@@ -648,6 +641,13 @@ public class DiaodanServiceImpl implements DiaodanService {
      * 处理即将掉单的
      */
     public void dealWillDeadLineDaoDan(TaskCallBack taskCallBack) {
+
+        LOG.info("before scan will lose crm , truncate lose_crm_recorde");
+        diaodanDao.truncateCrm0LoseReocrd();
+        diaodanDao.truncateCrm1LoseReocrd();
+        diaodanDao.truncateCrm2LoseReocrd();
+        diaodanDao.truncateCrm3LoseReocrd();
+
         TaskEntity task = new TaskEntity();
         List<CrmDetailEntity> crmDetailEntities = null;
         UDPClientSocket udpClientSocket = null;
@@ -661,10 +661,11 @@ public class DiaodanServiceImpl implements DiaodanService {
             List<LoseRecordEntity> loseRecordEntities = new ArrayList<LoseRecordEntity>();
             udpClientSocket = new UDPClientSocket();
             //封装loseRecordEntity数据
-            for (CrmLoseRuleEntity crmLoseRuleEntity : totalcCoprids) {
+           for (CrmLoseRuleEntity crmLoseRuleEntity : totalcCoprids) {
                 long corpid = crmLoseRuleEntity.getF_crop_id();
+                LOG.info("before scan will lose crm , t");
                 crmDetailEntities = searcherWillDeadLineDiaodanCrmIdByCorpId(48, corpid); // 即将调单的
-                LOG.info("will lose crimid ,corpId : " + corpid +" lose crimdis json :" + JSON.toJSONString(crmDetailEntities));
+                LOG.info("will lose crimid ,corpId : " + corpid + " lose crimdis json :" + JSON.toJSONString(crmDetailEntities));
                 if (crmDetailEntities == null) {
                     continue;
                 }
@@ -673,7 +674,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                     loseRecordEntity.setF_corp_id(corpid);
                     loseRecordEntity.setF_crm_id(crmDetailEntity.getF_crm_id());
                     loseRecordEntity.setF_lose_time(crmDetailEntity.getF_lose_time());
-                    loseRecordEntity.setF_last_contact_name(crmDetailEntity.getF_new_contact_time()==""?null:crmDetailEntity.getF_new_contact_time());
+                    loseRecordEntity.setF_last_contact_name(crmDetailEntity.getF_new_contact_time() == "" ? null : crmDetailEntity.getF_new_contact_time());
                     loseRecordEntity.setF_usr_id(crmDetailEntity.getF_user_id());
                     loseRecordEntity.setF_type(crmDetailEntity.getF_type());
                     loseRecordEntity.setF_createTime(DateUtil.convertDate2String(new Date()));
@@ -690,7 +691,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                 if (udpClientSocket != null) {
                     //发系统通知提醒
                     Map<Long/**usr_id**/, List<CrmDetailEntity>> userIdCrmMap = CollectionUtil.generateUserIdWithCrmIds(crmDetailEntities);
-                    if(userIdCrmMap!=null) {
+                    if (userIdCrmMap != null) {
                         for (Map.Entry<Long, List<CrmDetailEntity>> entry : userIdCrmMap.entrySet()) {
                             long usrId = entry.getKey();
                             List<CrmDetailEntity> crmDetailEntities1 = entry.getValue();
@@ -703,7 +704,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                     }
                     LOG.info("send lose remind tips success");
                 }
-            }
+           }
         } catch (Exception e) {
             LOG.error("fail to deal with will lose dan",e);
             task.setStarting(DiaodanConstants.EXECUT_FAIL);  //执行失败
