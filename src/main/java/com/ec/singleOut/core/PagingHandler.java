@@ -7,6 +7,6 @@ import java.util.List;
  */
 public interface PagingHandler<T> {
 
-    void pagingDealListCrmid(List<T> collections,T corpId)throws  InterruptedException;
+    void pagingDealListCrmid(List<T> collections,T corpId)throws  Exception;
 
 }

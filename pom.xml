@@ -448,7 +448,6 @@
                         </goals>
 
 
-
                         <configuration>
                             <classifier>dubbo</classifier>
                             <includes>

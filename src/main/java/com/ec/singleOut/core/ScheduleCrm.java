@@ -42,7 +42,7 @@ public class ScheduleCrm {
             LOG.info("scan blockQueue ,the queue size is  ============>" + loseCrmIds.size() + "=========scan time is  ===========> " + DateUtil.convertDate2String(new Date()));
             try {
                 final LoseCrmId loseCrmId = loseCrmIds.take(); //
-                LOG.debug("take loseCrmId from queue....., the lsoeCrmId is ============>" + JSON.toJSONString(loseCrmId));
+                LOG.info("take loseCrmId from queue....., the lsoeCrmId is ============>" + JSON.toJSONString(loseCrmId));
                 final long corpId = loseCrmId.getCorpId();
                 final List<Long> crmIds = loseCrmId.getCrmIds();
                 final  int stage = loseCrmId.getStage();

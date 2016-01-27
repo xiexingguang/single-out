@@ -273,7 +273,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                     }
                 }
             }//end if contact2 != 0
-        LOG.info("规则1，2，3  筛选 后 ， 企业id ：" + corpid  +  "符合条件的crmdetails  大小为：" + crmDetailEntities.size() );
+        LOG.info("规则1，2，3  筛选 后 ， 企业id ：" + corpid  +  "符合条件的 crm-details  大小为：" + crmDetailEntities.size() );
 
         //企业下的，crmid 联系方式 全部是无效联系，只针对已掉单的，处理已掉单，在 contact_time表里，全部是无效的联系方式的crmid也需要掉单
       /*  if (timeInterval == 0) {
@@ -395,6 +395,7 @@ public class DiaodanServiceImpl implements DiaodanService {
      */
     public void dealFail2DeadLineCrmId(long corpid, List<Long> crmIds, int stage) throws InterruptedException {
 
+        LOG.info("后台线程，开始执行掉单失败的crmIds, copriD:" + corpid +"掉单的crmIds 为 ：" + JSON.toJSONString(crmIds));
         //查询该企业下的所有crmId
         List<CrmDetailEntity> crmDetailEntities = crmDetailDao.findCrmDetailsByCorpId(corpid);
         //定时扫描的时候在扫描一下已经掉单的crmid，
@@ -812,7 +813,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                  //TODO
         }
 
-        public void pagingDealListCrmid(List collections, Object corpId) throws InterruptedException {
+        public void pagingDealListCrmid(List collections, Object corpId) throws Exception {
             if (collections == null) {
                 return;
             }
@@ -845,6 +846,10 @@ public class DiaodanServiceImpl implements DiaodanService {
     //清除关系crm_detail 表
     private void dealupdateCrmDetailByCorpId(long corpID, List<Long> crmIds) throws  InterruptedException{
         try {
+            if (crmIds == null || crmIds.size() == 0) {
+                LOG.warn("dealupdateCrmDetailByCorpId ,corpId :" + corpID +"have no lose crmIds");
+                return;
+            }
             LOG.info("【deal lose crimid】 : begin to update crm detail........... [coprid] " + corpID);
             crmDetailDao.updateCrmDetailByCorpId(corpID, crmIds);       // collections,为每次更新的调单crmid 集合
         } catch (Exception e) {
@@ -865,6 +870,10 @@ public class DiaodanServiceImpl implements DiaodanService {
     //更新共享关系，t_crm_relation
     private void dealupdateCrmRleationByCorpId(long corpID, List<Long> crmIds)throws  InterruptedException{
         try {
+            if (crmIds == null || crmIds.size() == 0) {
+                LOG.warn("dealupdateCrmRleationByCorpId ,corpId :" + corpID +"have no lose crmIds");
+                return;
+            }
             LOG.info("【deal lose crimid】 begin to update crm relation ........... [coprid] " + corpID);
             crmRelationDao.updateCrmRleationByCorpId(corpID, crmIds);
         } catch (Exception e) {
@@ -885,6 +894,10 @@ public class DiaodanServiceImpl implements DiaodanService {
     //删除共享关系t_crm_share_relation
     private void dealdeleteCrmShareRelation(long corpID, List<Long> crmIds)throws  InterruptedException{
         try {
+            if (crmIds == null || crmIds.size() == 0) {
+                LOG.warn("dealdeleteCrmShareRelation ,corpId :" + corpID +"have no lose crmIds");
+                return;
+            }
             LOG.info("【deal lose crimid】 begin to delete crm share relation........... [coprid] " + corpID);
             crmShareRelationDao.deleteCrmShareRelation(corpID, crmIds);
         } catch (Exception e) {
@@ -905,6 +918,10 @@ public class DiaodanServiceImpl implements DiaodanService {
     //删除公司关系t_crm_corp_relation
     private void deleteCrmCorpRelationCorpid(long corpID, List<Long> crmIds)throws  InterruptedException{
         try {
+            if (crmIds == null || crmIds.size() == 0) {
+                LOG.warn("deleteCrmCorpRelationCorpid ,corpId :" + corpID +"have no lose crmIds");
+                return;
+            }
             LOG.info("【deal lose crimid】 begin to delete crm_corp_relation........... [coprid] " + corpID);
             crmCorpRelationDao.deleteCrmCoprRelationShip(corpID, crmIds);
         } catch (Exception e) {
@@ -926,6 +943,10 @@ public class DiaodanServiceImpl implements DiaodanService {
     //清除qq关系
     private void cleanQQrelactionShip(long corpId,List<Long> crmids) throws  InterruptedException{
         try {
+            if (crmids == null || crmids.size() == 0) {
+                LOG.warn("cleanQQrelactionShip ,corpId :" + corpId +"have no lose crmIds");
+                return;
+            }
             LOG.info("【deal lose crimid】 begin to clear qq relationship.......... [coprid] " + corpId);
             boolean isNewCorp = crmDetailDao.isNewCorp(corpId);
             if (isNewCorp) {
@@ -953,6 +974,10 @@ public class DiaodanServiceImpl implements DiaodanService {
     //批量清除销售计划
     private void cleanCrmPan(long corpId, List<Long> crmIds) throws  InterruptedException{
         try {
+            if (crmIds == null || crmIds.size() == 0) {
+                LOG.warn("cleanCrmPan ,corpId :" + corpId +"have no lose crmIds");
+                return;
+            }
             LOG.info("【deal lose crimid】 begin to clear crm  plan ........... [coprid] " + corpId);
             boolean isNewCorp = crmDetailDao.isNewCorp(corpId);
             if (isNewCorp) {
@@ -984,6 +1009,10 @@ public class DiaodanServiceImpl implements DiaodanService {
      */
     private void writeChangeLog(long corpId, List<Long> crmIds,List<CrmDetailEntity> crmDetailEntities) throws  InterruptedException{
         try {
+            if (crmIds == null || crmIds.size() == 0) {
+                LOG.warn("writeChangeLog ,corpId :" + corpId +"have no lose crmIds");
+                return;
+            }
             LOG.info("【deal lose crimid】 .begin to write Change log........... [coprid] " + corpId);
             List<CrmchangeLogEntity> changeLogs = CollectionUtil.convertLong2CrmChangeLog(crmIds, crmDetailEntities);
             crmChangeLogDao.updateCrmChangeLog(corpId, changeLogs);
@@ -1008,6 +1037,10 @@ public class DiaodanServiceImpl implements DiaodanService {
     //批量更新上限
     private void batchUpdateCrmLimit(long corpid, List<Long> crmIds,List<CrmDetailEntity> crmDetailEntities) throws InterruptedException{
         try {
+            if (crmIds == null || crmIds.size() == 0) {
+                LOG.warn("batchUpdateCrmLimit ,corpId :" + corpid +"have no lose crmIds");
+                return;
+            }
             LOG.info("【deal lose crimid】 begin to update redis crmLimit............ [coprid] " + corpid);
             List<CrmDetailEntity> loseDetail = CollectionUtil.convertLong2CrmDetail(crmIds, crmDetailEntities);
             if (loseDetail == null || loseDetail.size() == 0) {
@@ -1041,6 +1074,10 @@ public class DiaodanServiceImpl implements DiaodanService {
     // 更新memecache
     private void batchUpdateMemcache(long corpId, List<Long> crmIds,List<CrmDetailEntity> crmDetailEntities) throws InterruptedException{
         try {
+            if (crmIds == null || crmIds.size() == 0) {
+                LOG.warn("batchUpdateMemcache,corpId :" + corpId +"have no lose crmIds");
+                return;
+            }
             LOG.info("【deal lose crimid】 .begin to update memcache.............. [coprid] " + corpId);
             List<CrmDetailEntity> loseDetail = CollectionUtil.convertLong2CrmDetail(crmIds, crmDetailEntities);
             Map<Long/**usr_id**/, List<CrmDetailEntity>> usrMap = CollectionUtil.generateUserIdWithCrmIds(loseDetail);
@@ -1117,6 +1154,10 @@ public class DiaodanServiceImpl implements DiaodanService {
 
     private void dealCrm2nsq(long corpID, List<Long> crmIds,List<CrmDetailEntity> crmDetailEntities) throws InterruptedException {
         try {
+            if (crmIds == null || crmIds.size() == 0) {
+                LOG.warn("write 2 nsq ,corpId :" + corpID +"have no lose crmIds");
+                return;
+            }
             LOG.info("【deal lose crimid】 begin write trial crm to nsq.............. [coprid] " + corpID);
             List<CrmDetailEntity> loseDetail = CollectionUtil.convertLong2CrmDetail(crmIds, crmDetailEntities);
             List<WriteNsqJson> writeNsqJsons = JsonUtil.chanageCrmDetail2WriteNsqJsons(loseDetail);

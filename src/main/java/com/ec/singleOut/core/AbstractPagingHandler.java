@@ -25,7 +25,7 @@ public abstract  class AbstractPagingHandler<T> implements  PagingHandler {
             try {
                 LOG.info("paginghandle corpid ,the corpid of cmrids < skipNUm , the corpid is  :" + corpId);
                 pagingDealListCrmid(collections, corpId);
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 //todo
             }
             return;
