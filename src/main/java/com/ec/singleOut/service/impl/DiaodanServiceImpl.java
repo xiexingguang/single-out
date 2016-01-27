@@ -33,7 +33,7 @@ import java.util.Map;
 @Component("singleOUtService")
 public class DiaodanServiceImpl implements DiaodanService {
 
-    private final Logger LOG = LogManager.getLogger(DiaodanServiceImpl.class);
+    private final Logger LOG = LogManager.getLogger("loseCrmService");
     private final Logger RECORD_FAIL_LOG = LogManager.getLogger("recordLoseCrmId");
 
     @Autowired

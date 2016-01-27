@@ -34,7 +34,7 @@
             </PatternLayout>
         </RollingRandomAccessFile>
 
-        <RollingRandomAccessFile name="dataIssue" fileName="${filePathPrefix}/dataIssue.log" immediateFlush="true" append="true"
+        <RollingRandomAccessFile name="loseCrmService" fileName="${filePathPrefix}/dataIssue.log" immediateFlush="true" append="true"
             filePattern="${filePathPrefix}/$${date:yyyy-MM}/dataIssue-%d{yyyy-MM-dd}-%i.log">
             <Policies>
                 <TimeBasedTriggeringPolicy />
@@ -73,20 +73,24 @@
         <logger name="java.net" level="ERROR" ></logger>
         <logger name="net.sf.log4jdbc" level="ERROR" ></logger>
         <logger name="org.apache.mina" level="ERROR" ></logger>
-        <logger name="com.ec.singleOut" level="info" additivity="true">
-            <AppenderRef ref="dataIssue" />
-        </logger>
         <logger name="com.alibaba.dubbo" level="ERROR" ></logger>
         <logger name="org.apache.zookeeper" level="ERROR" ></logger>
 
         <Root level="info">
+            <AppenderRef ref="stdout" level="info" />
             <AppenderRef ref="error" level="ERROR"/>
             <AppenderRef ref="CONSOLE" />
         </Root>
 
+
         <AsyncLogger name="recordLoseCrmId" level="info"
                      includeLocation="true" additivity="true">
             <AppenderRef ref="recordLoseCrmId" />
+        </AsyncLogger>
+
+        <AsyncLogger name="loseCrmService" level="info"
+                     includeLocation="true" additivity="true">
+            <AppenderRef ref="loseCrmService" />
         </AsyncLogger>
 
 
