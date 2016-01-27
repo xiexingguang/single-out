@@ -34,6 +34,7 @@ import java.util.Map;
 public class DiaodanServiceImpl implements DiaodanService {
 
     private final Logger LOG = LogManager.getLogger(DiaodanServiceImpl.class);
+    private final Logger RECORD_FAIL_LOG = LogManager.getLogger("recordLoseCrmId");
 
     @Autowired
     private CrmLoseRuleDao crmLoseRuleDao;
@@ -94,7 +95,7 @@ public class DiaodanServiceImpl implements DiaodanService {
      * @return
      */
     public List<CrmLoseRuleEntity> searcherSetDiaodanCorpIds() {
-        LOG.info("begin to deal with diaodan service ");
+        LOG.info("开始 查找 设置掉单规则的企业 ");
         //查询设置过掉单规则的corpids,
         List<CrmLoseRuleEntity> totalcCoprids = new ArrayList<CrmLoseRuleEntity>();
 
@@ -120,6 +121,8 @@ public class DiaodanServiceImpl implements DiaodanService {
         } catch (Exception e) {
             LOG.error("fail to get the lose corpId from crm1 ",e);
         }
+
+        // 线上放开
 
       /*  try {
             crm2 = crmLoseRuleDao.searcherRulesFromCrm2();
@@ -163,7 +166,7 @@ public class DiaodanServiceImpl implements DiaodanService {
             LOG.error("lose rule is not exist ,the coprid is :"+corpid);
             return crmDetailEntities;
         }
-        LOG.info("the rules of corpdi:===========>"+crmLoseRuleEntity);
+        LOG.info("the rules of corpid:===========>"+crmLoseRuleEntity);
 
         final int contact1 = crmLoseRuleEntity.getF_no_contact1();  //客户在客户库里面，表示 第一次创建。这个规则，往往它的联系时间就是create_time
         final int contact2 = crmLoseRuleEntity.getF_no_contact2();
@@ -200,7 +203,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                 final long usrs_id = entity.getF_user_id();
                 long day2lose = DateUtil.convertStringDate2LongDate(lose_time) - currentTime;
                 //log
-                LOG.info("规则1，企业id ：" + corpid  +" , 客户id为 ："+entity.getF_crm_id()+"===========> 掉单时间 ==》" + lose_time );
+                LOG.info("规则1条件过滤，企业id ：" + corpid  +" , 客户id为 ："+entity.getF_crm_id()+"===========> 掉单时间 ==》" + lose_time );
 
                 // 即将掉单的
                 if (timeInterval != 0) {
@@ -227,7 +230,6 @@ public class DiaodanServiceImpl implements DiaodanService {
             if (contact2 != 0 || updateNo != 0) {
                 //这里面查询出来的crmid,可能在
                 List<CrmContactTimeEntity> crmContactTimeEntities = crmContactTimeDao.findCrmOpearationTypeInEffecitiveCallWays(corpid, contact_type);
-                LOG.debug("============debugcrmContactTimeEntities============" + JSON.toJSONString(crmContactTimeEntities));
                 for (int i = 0; i < crmContactTimeEntities.size(); i++) {
                     CrmContactTimeEntity crmContactTimeEntity = crmContactTimeEntities.get(i);
                     String contactTime = crmContactTimeEntity.getF_contact_time(); //客户最新操作时间
@@ -245,7 +247,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                     long day2lose = DateUtil.convertStringDate2LongDate(lose_time) - currentTime;
 
                     //log
-                    LOG.info("规则2，3 企业id ：" + corpid  +" , 客户id为 ："+crmContactTimeEntity.getF_crm_id()+"===========> 掉单时间 ==》" + lose_time );
+                    LOG.info("规则2，3  过滤 企业id ：" + corpid  +" , 客户id为 ："+crmContactTimeEntity.getF_crm_id()+"===========> 掉单时间 ==》" + lose_time );
 
                     if (timeInterval != 0) {           // 查询的是即将timeInterval时间间隔掉单的crmId
                         final String rember_time = DateUtil.removeDateOfHour(lose_time, timeInterval);
@@ -272,7 +274,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                     }
                 }
             }//end if contact2 != 0
-
+        LOG.info("规则1，2，3  筛选 后 ， 企业id ：" + corpid  +  "符合条件的crmdetails  大小为：" + crmDetailEntities.size() );
 
         //企业下的，crmid 联系方式 全部是无效联系，只针对已掉单的，处理已掉单，在 contact_time表里，全部是无效的联系方式的crmid也需要掉单
       /*  if (timeInterval == 0) {
@@ -315,15 +317,15 @@ public class DiaodanServiceImpl implements DiaodanService {
             }
 
             //标签过滤
-            LOG.info("开始标签过滤筛选，筛选前crmids size为:" + crmDetailEntities.size());
+
             remvoeDuplicateCrmIdAndfilterNotContainTag(crmDetailEntities, tags);
-            LOG.info("开始标签过滤筛选，筛选后crmids size为:" + crmDetailEntities.size());
+            LOG.info("..................开始标签过滤筛选，筛选后..................crmids size为:" + crmDetailEntities.size());
 
             //rule设置了无标签客户也需要掉单
+
             if (isNeedAddNotagCrm && noTagsCrm != null) {
-                LOG.info("开始无标签筛选，筛选前crmids size为:" + crmDetailEntities.size());
                 crmDetailEntities.addAll(noTagsCrm);
-                LOG.info("开始无标签筛选，筛选后crmids size为:" + crmDetailEntities.size());
+                LOG.info(".................开始无标签筛选，筛选后.........................crmids size为:" + crmDetailEntities.size());
             }
         }
         return crmDetailEntities;
@@ -337,12 +339,15 @@ public class DiaodanServiceImpl implements DiaodanService {
      */
     public void dealDeadLineDiaodanCrmIdByCorpId(long corpid) {
 
+        LOG.info("【deal  lose crimid】 corpid : " + corpid + "开始执行掉单");
         //查出掉单的crmid，这个掉单的crmid，数量可能巨大
         List<CrmDetailEntity> crmDetailEntities = searcherWillDeadLineDiaodanCrmIdByCorpId(0, corpid);
         if (crmDetailEntities == null || crmDetailEntities.size() == 0) {
             LOG.warn("corpId :" + corpid +", have no lose crm ids");
             return;
         }
+        LOG.info("【deal  lose crimid】 ,企业 ：" + corpid  +" 下 掉单的 客户数量为 ：" + crmDetailEntities.size());
+
         //日志 跟踪
         Map<Long/**usr_id**/, List<CrmDetailEntity>> map = CollectionUtil.generateUserIdWithCrmIds(crmDetailEntities);
         for (Map.Entry<Long, List<CrmDetailEntity>> entry : map.entrySet()) {
@@ -351,17 +356,16 @@ public class DiaodanServiceImpl implements DiaodanService {
             LOG.info("企业id为: ===>"+ corpid  + " 用户id 为 : ==>" + usrId +" 该用户下的掉单的客户数量为：" + crmids.size() +" 掉单客户详情为 ===》" + JSON.toJSONString(crmids));
         }
 
-        LOG.info("search for the lose crm ,the lose corpId is :" + corpid +"====:lose crmIds size is ====>"+crmDetailEntities.size());
         //转换CrmDetailEntity ==> long  类型,该企业下的调单crmid
         List<Long> ids = CollectionUtil.convertListCrmDetail2Long(crmDetailEntities);
 
+        LOG.info("【deal  lose crimid】 PagingHanlder　分页开始执行　 : " + corpid);
         //分页，更新数据库，调用es, 写nsq等业务逻辑
         PagingExcuteCrmId pagingExcuteCrmId = new PagingExcuteCrmId();
         pagingExcuteCrmId.setLoseCrmIds(crmDetailEntities);
         pagingExcuteCrmId.dealPageList(ids, configProperties.OPEAATION_NUMBER, (Long) corpid);
         // 分组发送通知，给IM
         UDPClientSocket udpClientSocket = new UDPClientSocket();   // 每次new？ 以后优化
-
 
         try {
             if (udpClientSocket != null) {
@@ -370,13 +374,13 @@ public class DiaodanServiceImpl implements DiaodanService {
                 for (Map.Entry<Long, List<CrmDetailEntity>> entry : userIdCrmMap.entrySet()) {
                     long usrId = entry.getKey();
                     final  String updataMessage = String.format("type=411+succnum=%d", 0);
-                    LOG.info(String.format("通知 IM Server: userId=%1s, message=[%2s]", String.valueOf(usrId), updataMessage));
+                    LOG.info(String.format("【deail ose crimid】通知 IM Server: userId=%1s, message=[%2s]", String.valueOf(usrId), updataMessage));
                     byte[] tipsDataPacket = Packet.packet(usrId, updataMessage);
                     udpClientSocket.send(configProperties.IM_HOST, configProperties.IM_PORT, tipsDataPacket);
                 }
             }
         } catch (Exception e) {
-                LOG.error("deal lose crm ,fail to send notice to the IM server ,the corpid is :" + corpid ,e);
+                LOG.error("【deail ose crimid】  ,fail to send notice to the IM server ,the corpid is :" + corpid ,e);
         }finally {
             udpClientSocket.close();
         }
@@ -595,9 +599,7 @@ public class DiaodanServiceImpl implements DiaodanService {
     public void dealDeadLineDiaodan() {
 
        final  List<CrmLoseRuleEntity> totalcCoprids = searcherSetDiaodanCorpIds();
-        LOG.info("deal lose crm service has been call ,the scan of the total  corpId is : "+totalcCoprids.size());
-
-        LOG.debug("scan of the corpids is  : " + JSON.toJSONString(totalcCoprids));
+        LOG.info("【deal lose crimid】, 扫描设置的掉单企业数为 ：" + " size :" + totalcCoprids.size() + "detail info :" + JSON.toJSONString(totalcCoprids));
         if (client == null) {
             for(int i=0; i<3;i++){
                 client = thriftClient.getThriftClient();  //初始化thrift,重试3次，有可能是网络问题
@@ -624,7 +626,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                     public void notifyTaskTheResultOfcallService(TaskEntity entity) {
                         try {
                             taskDao.updateTask(entity);
-                            LOG.info("...........deal lose CRM id is done..........");
+                            LOG.info("...........【deal lose crimid】  is done..........");
                         } catch (Exception e) {
                             LOG.error("call back task ,fail to update task  ", e);
                         }finally{
@@ -642,11 +644,12 @@ public class DiaodanServiceImpl implements DiaodanService {
      */
     public void dealWillDeadLineDaoDan(TaskCallBack taskCallBack) {
 
-        LOG.info("before scan will lose crm , truncate lose_crm_recorde");
+        LOG.info("【scan will lose crimid】 before scan will lose crm , truncate lose_crm_recorde");
         diaodanDao.truncateCrm0LoseReocrd();
         diaodanDao.truncateCrm1LoseReocrd();
         diaodanDao.truncateCrm2LoseReocrd();
         diaodanDao.truncateCrm3LoseReocrd();
+        LOG.info("【scan will lose crimid】 truncate lose_crm_recorde has finished......");
 
         TaskEntity task = new TaskEntity();
         List<CrmDetailEntity> crmDetailEntities = null;
@@ -655,17 +658,17 @@ public class DiaodanServiceImpl implements DiaodanService {
         try {
             List<CrmLoseRuleEntity> totalcCoprids = searcherSetDiaodanCorpIds();
             if (totalcCoprids == null || totalcCoprids.size() == 0) {
-                LOG.info("finished deal will lose crm , have no coprid set lose rule");
+                LOG.info("【scan will lose crimid】 finished deal will lose crm , have no coprid set lose rule");
                 return;
             }
+            LOG.info("【scan will lose crimid】, 扫描设置的掉单企业数为 ：" + " size :" + totalcCoprids.size() +  "detail info :" +JSON.toJSONString(crmDetailEntities) );
             List<LoseRecordEntity> loseRecordEntities = new ArrayList<LoseRecordEntity>();
             udpClientSocket = new UDPClientSocket();
             //封装loseRecordEntity数据
            for (CrmLoseRuleEntity crmLoseRuleEntity : totalcCoprids) {
                 long corpid = crmLoseRuleEntity.getF_crop_id();
-                LOG.info("before scan will lose crm , t");
                 crmDetailEntities = searcherWillDeadLineDiaodanCrmIdByCorpId(48, corpid); // 即将调单的
-                LOG.info("will lose crimid ,corpId : " + corpid + " lose crimdis json :" + JSON.toJSONString(crmDetailEntities));
+                LOG.info("【scan will lose crimid】  the corpId is : " + corpid + " lose crimdis size :" + crmDetailEntities.size() );
                 if (crmDetailEntities == null) {
                     continue;
                 }
@@ -684,10 +687,9 @@ public class DiaodanServiceImpl implements DiaodanService {
                 diaodanDao.updateLoseRecord(loseRecordEntities, corpid); //批量replace 即将掉单表
                 task.setStarting(DiaodanConstants.EXECUT_SUCCESS);
                 task.setLastEndDate(new Date());
-                LOG.info("will lose dan service  success  finished  db operation , the corpId is: " + corpid);
+                LOG.info("【scan will lose crimid】：  success  finished insert lose_record , the corpId is: " + corpid);
 
                 //send tips
-                //udpClientSocket.setSoTimeout();
                 if (udpClientSocket != null) {
                     //发系统通知提醒
                     Map<Long/**usr_id**/, List<CrmDetailEntity>> userIdCrmMap = CollectionUtil.generateUserIdWithCrmIds(crmDetailEntities);
@@ -697,16 +699,16 @@ public class DiaodanServiceImpl implements DiaodanService {
                             List<CrmDetailEntity> crmDetailEntities1 = entry.getValue();
                             int size = crmDetailEntities1.size();
                             final String tipsMessage = String.format(DiaodanConstants.LOSE_REMIND_FORMAT, size);
-                            LOG.info("send lose tips ,the tipsMessage is :" + tipsMessage + "======userId is ====" + usrId);
+                            LOG.info("【scan will lose crimid】 send lose tips ,the tipsMessage is :" + tipsMessage + "======userId is ====" + usrId);
                             byte[] tipsDataPacket = Packet.packet(usrId, tipsMessage);
                             udpClientSocket.send(configProperties.IM_HOST, configProperties.IM_PORT, tipsDataPacket);
                         }
                     }
-                    LOG.info("send lose remind tips success");
+                    LOG.info("【scan will lose crimid】 send lose remind tips success");
                 }
            }
         } catch (Exception e) {
-            LOG.error("fail to deal with will lose dan",e);
+            LOG.error("【scan will lose crimid】 fail to scan will lose dan",e);
             task.setStarting(DiaodanConstants.EXECUT_FAIL);  //执行失败
             task.setLastEndDate(new Date());
         }finally {
@@ -721,13 +723,13 @@ public class DiaodanServiceImpl implements DiaodanService {
      */
      public void   dealWillLoseDan(){
 
-           LOG.info("begin deal will lose dan service ,the time is :" + new Date().toLocaleString());
+           LOG.info("..................【scan will lose crimid】 begin to scan will lose dan service ..............,execute time  is :" + new Date().toLocaleString());
             new Thread(new Runnable() {
                 public void run() {
                     dealWillDeadLineDaoDan(new TaskCallBack() {
                         public void notifyTaskTheResultOfcallService(TaskEntity entity) {
                             taskDao.updateTask(entity);
-                            LOG.info("...........scan will lose crm is done..........");
+                            LOG.info("...........【scan will lose crimid】 scan will lose crm is done..........");
                         }
                     });
                 }
@@ -755,10 +757,7 @@ public class DiaodanServiceImpl implements DiaodanService {
         }
         // 取差
         List<CrmDetailEntity> copyOfCrm = CollectionUtil.inCrmDetailNotIncontactTime(crmDetailEntities,crmContactTimeEntities);
-
-
         return copyOfCrm;
-
     }
 
 
@@ -845,7 +844,7 @@ public class DiaodanServiceImpl implements DiaodanService {
     //清除关系crm_detail 表
     private void dealupdateCrmDetailByCorpId(long corpID, List<Long> crmIds) throws  InterruptedException{
         try {
-            LOG.info("....................begin to update crm detail........... [coprid] " + corpID);
+            LOG.info("【deal lose crimid】 : begin to update crm detail........... [coprid] " + corpID);
             crmDetailDao.updateCrmDetailByCorpId(corpID, crmIds);       // collections,为每次更新的调单crmid 集合
         } catch (Exception e) {
             LOG.error("fail to update crm detail ,the corpId is" + corpID + ",the crmIds size is :" + crmIds.size(), e);
@@ -853,7 +852,11 @@ public class DiaodanServiceImpl implements DiaodanService {
             crmId.setCrmIds(crmIds);
             crmId.setCorpId(corpID);
             crmId.setStage(0);
-            SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.put(crmId);        //写入阻塞队列
+            RECORD_FAIL_LOG.error("掉单失败的crmIds:" + JSON.toJSONString(crmId));
+            boolean notFull = SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.offer(crmId);
+            if (!notFull) {
+                LOG.warn("............crmId队已满..............");
+            }
             throw new RuntimeException("fail to updateCrmDetail By CorpId",e);
         }
     }
@@ -861,23 +864,27 @@ public class DiaodanServiceImpl implements DiaodanService {
     //更新共享关系，t_crm_relation
     private void dealupdateCrmRleationByCorpId(long corpID, List<Long> crmIds)throws  InterruptedException{
         try {
-            LOG.info("....................begin to update crm relation ........... [coprid] " + corpID);
+            LOG.info("【deal lose crimid】 begin to update crm relation ........... [coprid] " + corpID);
             crmRelationDao.updateCrmRleationByCorpId(corpID, crmIds);
         } catch (Exception e) {
-            LOG.error("fail to update crm relationShip ,the corpId is"+ corpID +",the crmIds size is :" + crmIds.size(),e);
+            LOG.error("【deal lose crimid】 fail to update crm relationShip ,the corpId is"+ corpID +",the crmIds size is :" + crmIds.size(),e);
             LoseCrmId crmId = new LoseCrmId();
             crmId.setCrmIds(crmIds);
             crmId.setCorpId(corpID);
             crmId.setStage(1);
-            SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.put(crmId);        //写入阻塞队列
-            throw new RuntimeException("fail to updateCrmRleationByCorpId By CorpId",e);
+            RECORD_FAIL_LOG.error("掉单失败的crmIds:" + JSON.toJSONString(crmId));
+            boolean notFull = SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.offer(crmId);
+            if (!notFull) {
+                LOG.warn("............crmId队已满..............");
+            }
+            throw new RuntimeException("【deal lose crimid】 fail to updateCrmRleationByCorpId By CorpId",e);
         }
     }
 
     //删除共享关系t_crm_share_relation
     private void dealdeleteCrmShareRelation(long corpID, List<Long> crmIds)throws  InterruptedException{
         try {
-            LOG.info("....................begin to delete crm share relation........... [coprid] " + corpID);
+            LOG.info("【deal lose crimid】 begin to delete crm share relation........... [coprid] " + corpID);
             crmShareRelationDao.deleteCrmShareRelation(corpID, crmIds);
         } catch (Exception e) {
             LOG.error("fail to delete crm shareRelationShip ,the corpId is"+ corpID +",the crmIds size is :" + crmIds.size(),e);
@@ -885,15 +892,19 @@ public class DiaodanServiceImpl implements DiaodanService {
             crmId.setCrmIds(crmIds);
             crmId.setCorpId(corpID);
             crmId.setStage(2);
-            SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.put(crmId);        //写入阻塞队列
-            throw new RuntimeException("fail to deleteCrmShareRelation By CorpId",e);
+            RECORD_FAIL_LOG.error("掉单失败的crmIds:" + JSON.toJSONString(crmId));
+            boolean notFull = SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.offer(crmId);
+            if (!notFull) {
+                LOG.warn("............crmId队已满..............");
+            }
+            throw new RuntimeException("【deal lose crimid】 fail to deleteCrmShareRelation By CorpId",e);
         }
     }
 
     //删除公司关系t_crm_corp_relation
     private void deleteCrmCorpRelationCorpid(long corpID, List<Long> crmIds)throws  InterruptedException{
         try {
-            LOG.info("....................begin to delete crm_corp_relation........... [coprid] " + corpID);
+            LOG.info("【deal lose crimid】 begin to delete crm_corp_relation........... [coprid] " + corpID);
             crmCorpRelationDao.deleteCrmCoprRelationShip(corpID, crmIds);
         } catch (Exception e) {
             LOG.error("fail to update crmCorp  ,the corpId is"+ corpID +",the crmIds size is :" + crmIds.size(),e);
@@ -901,8 +912,12 @@ public class DiaodanServiceImpl implements DiaodanService {
             crmId.setCrmIds(crmIds);
             crmId.setCorpId(corpID);
             crmId.setStage(3);
-            SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.put(crmId);        //写入阻塞队列
-            throw new RuntimeException("fail to updateCrmCorpByCorpid By CorpId",e);
+            RECORD_FAIL_LOG.error("掉单失败的crmIds:" + JSON.toJSONString(crmId));
+            boolean notFull = SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.offer(crmId);
+            if (!notFull) {
+                LOG.warn("............crmId队已满..............");
+            }
+            throw new RuntimeException("【deal lose crimid】 fail to updateCrmCorpByCorpid By CorpId",e);
 
         }
     }
@@ -910,7 +925,7 @@ public class DiaodanServiceImpl implements DiaodanService {
     //清除qq关系
     private void cleanQQrelactionShip(long corpId,List<Long> crmids) throws  InterruptedException{
         try {
-            LOG.info("....................begin to clear qq relationship.......... [coprid] " + corpId);
+            LOG.info("【deal lose crimid】 begin to clear qq relationship.......... [coprid] " + corpId);
             boolean isNewCorp = crmDetailDao.isNewCorp(corpId);
             if (isNewCorp) {
                 LOG.info("corpId is new corp, not need update QQ,the corpId is :"+corpId);
@@ -918,13 +933,17 @@ public class DiaodanServiceImpl implements DiaodanService {
             }
             qqClassInfoDao.updateDecQQclassInfoByCrmIds(crmids);
         } catch (Exception e) {
-            LOG.error("fail to update QQ  ,the corpId is"+ corpId +",the crmIds size is :" + crmids.size(),e);
+            LOG.error("【deal lose crimid】 fail to update QQ  ,the corpId is"+ corpId +",the crmIds size is :" + crmids.size(),e);
             LoseCrmId crmId = new LoseCrmId();
             crmId.setCrmIds(crmids);
             crmId.setCorpId(corpId);
             crmId.setStage(DiaodanConstants.UPDATE_QQ);
-            SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.put(crmId);        //写入阻塞队列
-            throw new RuntimeException("fail to updateCrmCorpByCorpid By CorpId",e);
+            RECORD_FAIL_LOG.error("掉单失败的crmIds:" + JSON.toJSONString(crmId));
+            boolean notFull = SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.offer(crmId);
+            if (!notFull) {
+                LOG.warn("............crmId队已满..............");
+            }
+            throw new RuntimeException("【deal lose crimid】 fail to updateCrmCorpByCorpid By CorpId",e);
 
         }
     }
@@ -933,7 +952,7 @@ public class DiaodanServiceImpl implements DiaodanService {
     //批量清除销售计划
     private void cleanCrmPan(long corpId, List<Long> crmIds) throws  InterruptedException{
         try {
-            LOG.info("....................begin to clear crm  plan ........... [coprid] " + corpId);
+            LOG.info("【deal lose crimid】 begin to clear crm  plan ........... [coprid] " + corpId);
             boolean isNewCorp = crmDetailDao.isNewCorp(corpId);
             if (isNewCorp) {
                 LOG.info("corpId is new corp, not need update QQ,the corpId is :"+corpId);
@@ -942,13 +961,17 @@ public class DiaodanServiceImpl implements DiaodanService {
             crmPlanDetailDao.updateCrmPlan(corpId, crmIds);
             crmPlanDetailDao.deleteCrmPlan(corpId, crmIds);
         } catch (Exception e) {
-            LOG.error("fail to update CrmPan  ,the corpId is"+ corpId +",the crmIds size is :" + crmIds.size(),e);
+            LOG.error("【deal lose crimid】 fail to update CrmPan  ,the corpId is"+ corpId +",the crmIds size is :" + crmIds.size(),e);
             LoseCrmId crmId = new LoseCrmId();
             crmId.setCrmIds(crmIds);
             crmId.setCorpId(corpId);
             crmId.setStage(DiaodanConstants.UPDATE_QQ);
-            SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.put(crmId);        //写入阻塞队列
-            throw new RuntimeException("fail to updateCrmCorpByCorpid By CorpId",e);
+            RECORD_FAIL_LOG.error("掉单失败的crmIds:" + JSON.toJSONString(crmId));
+            boolean notFull = SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.offer(crmId);
+            if (!notFull) {
+                LOG.warn("............crmId队已满..............");
+            }
+            throw new RuntimeException("【deal lose crimid】 fail to updateCrmCorpByCorpid By CorpId",e);
         }
     }
 
@@ -960,7 +983,7 @@ public class DiaodanServiceImpl implements DiaodanService {
      */
     private void writeChangeLog(long corpId, List<Long> crmIds,List<CrmDetailEntity> crmDetailEntities) throws  InterruptedException{
         try {
-            LOG.info("....................begin to write Change log........... [coprid] " + corpId);
+            LOG.info("【deal lose crimid】 .begin to write Change log........... [coprid] " + corpId);
             List<CrmchangeLogEntity> changeLogs = CollectionUtil.convertLong2CrmChangeLog(crmIds, crmDetailEntities);
             crmChangeLogDao.updateCrmChangeLog(corpId, changeLogs);
             crmChangeOnceDao.updateCrmChangeOnce(corpId, changeLogs);
@@ -971,7 +994,11 @@ public class DiaodanServiceImpl implements DiaodanService {
             crmId.setCrmIds(crmIds);
             crmId.setCorpId(corpId);
             crmId.setStage(DiaodanConstants.UPDATE_CHANGE_LOG);
-            SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.put(crmId);        //写入阻塞队列
+            RECORD_FAIL_LOG.error("掉单失败的crmIds:" + JSON.toJSONString(crmId));
+            boolean notFull = SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.offer(crmId);
+            if (!notFull) {
+                LOG.warn("............crmId队已满..............");
+            }
             throw new RuntimeException("fail to updateCrmCorpByCorpid By CorpId",e);
         }
     }
@@ -980,7 +1007,7 @@ public class DiaodanServiceImpl implements DiaodanService {
     //批量更新上限
     private void batchUpdateCrmLimit(long corpid, List<Long> crmIds,List<CrmDetailEntity> crmDetailEntities) throws InterruptedException{
         try {
-            LOG.info("....................begin to update redis crmLimit............ [coprid] " + corpid);
+            LOG.info("【deal lose crimid】 begin to update redis crmLimit............ [coprid] " + corpid);
             List<CrmDetailEntity> loseDetail = CollectionUtil.convertLong2CrmDetail(crmIds, crmDetailEntities);
             if (loseDetail == null || loseDetail.size() == 0) {
                 return;
@@ -1000,7 +1027,11 @@ public class DiaodanServiceImpl implements DiaodanService {
             crmId.setCrmIds(crmIds);
             crmId.setCorpId(corpid);
             crmId.setStage(DiaodanConstants.UPDATE_REDIS_LIMIT);
-            SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.put(crmId);        //写入阻塞队列
+            RECORD_FAIL_LOG.error("掉单失败的crmIds:" + JSON.toJSONString(crmId));
+            boolean notFull = SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.offer(crmId);
+            if (!notFull) {
+                LOG.warn("............crmId队已满..............");
+            }
             throw new RuntimeException("fail to write ES  By CorpId",e);
         }
 
@@ -1009,7 +1040,7 @@ public class DiaodanServiceImpl implements DiaodanService {
     // 更新memecache
     private void batchUpdateMemcache(long corpId, List<Long> crmIds,List<CrmDetailEntity> crmDetailEntities) throws InterruptedException{
         try {
-            LOG.info("....................begin to update memcache.............. [coprid] " + corpId);
+            LOG.info("【deal lose crimid】 .begin to update memcache.............. [coprid] " + corpId);
             List<CrmDetailEntity> loseDetail = CollectionUtil.convertLong2CrmDetail(crmIds, crmDetailEntities);
             Map<Long/**usr_id**/, List<CrmDetailEntity>> usrMap = CollectionUtil.generateUserIdWithCrmIds(loseDetail);
             if(usrMap!=null) {
@@ -1028,7 +1059,11 @@ public class DiaodanServiceImpl implements DiaodanService {
             crmId.setCrmIds(crmIds);
             crmId.setCorpId(corpId);
             crmId.setStage(DiaodanConstants.UPDATE_MEMCACHE);
-            SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.put(crmId);        //写入阻塞队列
+            RECORD_FAIL_LOG.error("掉单失败的crmIds:" + JSON.toJSONString(crmId));
+            boolean notFull = SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.offer(crmId);
+            if (!notFull) {
+                LOG.warn("............crmId队已满..............");
+            }
             throw new RuntimeException("fail to write ES  By CorpId",e);
         }
 
@@ -1061,23 +1096,27 @@ public class DiaodanServiceImpl implements DiaodanService {
                     throw new RuntimeException("fail to connect the  ES,will not to deal diao dan service");
                 }
             }
-            LOG.info("....................begin write crm 2 ES............. [coprid] " + corpID);
+            LOG.info("【deal lose crimid】 begin write crm 2 ES............. [coprid] " + corpID);
             client.batchInsertOrUpdate(corpID, crmIds);
         } catch (TException e) {
-            LOG.error("fail to  write crmId to ES  ,the corpId is :====>" + corpID + ",the crmIds size is :" + crmIds.size(), e);
+            LOG.error("【deal lose crimid】 fail to  write crmId to ES  ,the corpId is :====>" + corpID + ",the crmIds size is :" + crmIds.size(), e);
             LoseCrmId crmId = new LoseCrmId();
             crmId.setCrmIds(crmIds);
             crmId.setCorpId(corpID);
             crmId.setStage(DiaodanConstants.WRITE_ES);
-            SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.put(crmId);        //写入阻塞队列
-            throw new RuntimeException("fail to write ES  By CorpId",e);
+            RECORD_FAIL_LOG.error("掉单失败的crmIds:" + JSON.toJSONString(crmId));
+            boolean notFull = SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.offer(crmId);        //写入阻塞队列,如果队列满了，则一直阻塞，那么当前线程会假死...这样不红啊
+            if (!notFull) {
+                LOG.warn("............crmId队已满..............");
+            }
+            throw new RuntimeException("【deal lose crimid】 fail to write ES  By CorpId",e);
         }
     }
     // 写轨迹到nsq
 
     private void dealCrm2nsq(long corpID, List<Long> crmIds,List<CrmDetailEntity> crmDetailEntities) throws InterruptedException {
         try {
-            LOG.info("....................begin write trial crm to nsq.............. [coprid] " + corpID);
+            LOG.info("【deal lose crimid】 begin write trial crm to nsq.............. [coprid] " + corpID);
             List<CrmDetailEntity> loseDetail = CollectionUtil.convertLong2CrmDetail(crmIds, crmDetailEntities);
             List<WriteNsqJson> writeNsqJsons = JsonUtil.chanageCrmDetail2WriteNsqJsons(loseDetail);
             nsqHandler.writeCustomerTrail(writeNsqJsons, corpID);
@@ -1087,8 +1126,12 @@ public class DiaodanServiceImpl implements DiaodanService {
             crmId.setCrmIds(crmIds);
             crmId.setCorpId(corpID);
             crmId.setStage(DiaodanConstants.WRITE_NSQ);
-            SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.put(crmId);        //写入阻塞队列
-            throw new RuntimeException("fail to write the trail to nsq  By CorpId",e);
+            RECORD_FAIL_LOG.error("掉单失败的crmIds:" + JSON.toJSONString(crmId));
+            boolean notFull = SingleOutContext.FAIL_TO_EXCUTE_LOSECRM.offer(crmId);
+            if (!notFull) {
+                LOG.warn("............crmId队已满..............");
+            }
+            throw new RuntimeException("【deal lose crimid】 fail to write the trail to nsq  By CorpId",e);
         }
     }
 

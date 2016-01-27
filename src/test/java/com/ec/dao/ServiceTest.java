@@ -1,6 +1,5 @@
 package com.ec.dao;
 
-import com.alibaba.fastjson.JSON;
 import com.ec.singleOut.entity.CrmDetailEntity;
 import com.ec.singleOut.service.DiaodanService;
 import org.junit.Test;
@@ -46,15 +45,15 @@ public class ServiceTest {
 
     @Test
     public void testSearWillLoseCrmId() {
-        List<CrmDetailEntity> crmDetailEntities = diaodanService.searcherWillDeadLineDiaodanCrmIdByCorpId(48, 5009923);
+        List<CrmDetailEntity> crmDetailEntities = diaodanService.searcherWillDeadLineDiaodanCrmIdByCorpId(0, 59340);
         System.out.println("will crmid  ================ >>>" +  crmDetailEntities.size());
-        System.out.println("will lose crm id " + JSON.toJSONString(crmDetailEntities, true));
+       // System.out.println("will lose crm id " + JSON.toJSONString(crmDetailEntities, true));
     }
 
 
     @Test
     public void testDealLoseCrm() {
-        diaodanService.dealDeadLineDiaodanCrmIdByCorpId(5022954);
+        diaodanService.dealDeadLineDiaodanCrmIdByCorpId(59340);
     }
 
     @Test
