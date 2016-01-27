@@ -1115,8 +1115,8 @@ public class DiaodanServiceImpl implements DiaodanService {
                 LOG.warn("write 2 es ,corpId :" + corpID +"have no lose crmIds");
                 return;
             }
-            if (client == null) {
-                if (client == null) {
+
+                if (client == null || !thriftClient.isOpen()) {
                     for (int i = 0; i < 3; i++) {
                         client = thriftClient.getThriftClient();  //初始化thrift,重试3次，有可能是网络问题
                         if (client != null) {
@@ -1133,7 +1133,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                     LOG.error("fail to init thrift client , will fail to deal ES ");
                     throw new RuntimeException("fail to connect the  ES,will not to deal diao dan service");
                 }
-            }
+
             LOG.info("【deal lose crimid】 begin write crm 2 ES............. [coprid] " + corpID);
             client.batchInsertOrUpdate(corpID, crmIds);
         } catch (TException e) {

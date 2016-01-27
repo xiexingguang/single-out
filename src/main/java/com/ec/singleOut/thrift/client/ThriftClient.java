@@ -40,6 +40,16 @@ public class ThriftClient {
               LOG.error("fail to connect the thrift client ,the exceptions is  ",e);
             return null;
         }
+
+        if(!tTransport.isOpen()) {
+            try {
+                tTransport.open();
+            } catch (Exception e) {
+                LOG.error("fail to open Transport ",e);
+                client = null;
+            }
+        }
+
         return client;
     }
 
@@ -50,6 +60,13 @@ public class ThriftClient {
             LOG.error("fail to close the thrift client");
         }
         LOG.info("close the thrift client");
+    }
+
+    public boolean  isOpen() {
+        if (tTransport == null) {
+            return false;
+        }
+        return tTransport.isOpen();
     }
 
 }
