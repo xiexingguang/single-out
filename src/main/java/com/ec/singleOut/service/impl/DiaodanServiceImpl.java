@@ -660,7 +660,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                 LOG.info("【scan will lose crimid】 finished deal will lose crm , have no coprid set lose rule");
                 return;
             }
-            LOG.info("【scan will lose crimid】, 扫描设置的掉单企业数为 ：" + " size :" + totalcCoprids.size() +  "detail info :" +JSON.toJSONString(crmDetailEntities) );
+            LOG.info("【scan will lose crimid】, 扫描设置的掉单企业数为 ：" + " size :" + totalcCoprids.size() +  "detail info :" +JSON.toJSONString(totalcCoprids) );
             List<LoseRecordEntity> loseRecordEntities = new ArrayList<LoseRecordEntity>();
             udpClientSocket = new UDPClientSocket();
             //封装loseRecordEntity数据
