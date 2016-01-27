@@ -203,8 +203,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                 final long usrs_id = entity.getF_user_id();
                 long day2lose = DateUtil.convertStringDate2LongDate(lose_time) - currentTime;
                 //log
-                LOG.info("规则1条件过滤，企业id ：" + corpid  +" , 客户id为 ："+entity.getF_crm_id()+"===========> 掉单时间 ==》" + lose_time );
-
+                LOG.debug("规则1条件过滤，企业id ：" + corpid + " , 客户id为 ：" + entity.getF_crm_id() + "===========> 掉单时间 ==》" + lose_time);
                 // 即将掉单的
                 if (timeInterval != 0) {
                     String rember_time = DateUtil.removeDateOfHour(lose_time, timeInterval);
@@ -247,7 +246,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                     long day2lose = DateUtil.convertStringDate2LongDate(lose_time) - currentTime;
 
                     //log
-                    LOG.info("规则2，3  过滤 企业id ：" + corpid  +" , 客户id为 ："+crmContactTimeEntity.getF_crm_id()+"===========> 掉单时间 ==》" + lose_time );
+                    LOG.debug("规则2，3  过滤 企业id ：" + corpid + " , 客户id为 ：" + crmContactTimeEntity.getF_crm_id() + "===========> 掉单时间 ==》" + lose_time);
 
                     if (timeInterval != 0) {           // 查询的是即将timeInterval时间间隔掉单的crmId
                         final String rember_time = DateUtil.removeDateOfHour(lose_time, timeInterval);
@@ -668,10 +667,10 @@ public class DiaodanServiceImpl implements DiaodanService {
            for (CrmLoseRuleEntity crmLoseRuleEntity : totalcCoprids) {
                 long corpid = crmLoseRuleEntity.getF_crop_id();
                 crmDetailEntities = searcherWillDeadLineDiaodanCrmIdByCorpId(48, corpid); // 即将调单的
-                LOG.info("【scan will lose crimid】  the corpId is : " + corpid + " lose crimdis size :" + crmDetailEntities.size() );
                 if (crmDetailEntities == null) {
                     continue;
                 }
+               LOG.info("【scan will lose crimid】  the corpId is : " + corpid + " lose crimdis size :" + crmDetailEntities.size() );
                 for (CrmDetailEntity crmDetailEntity : crmDetailEntities) {
                     LoseRecordEntity loseRecordEntity = new LoseRecordEntity();
                     loseRecordEntity.setF_corp_id(corpid);
@@ -814,8 +813,10 @@ public class DiaodanServiceImpl implements DiaodanService {
         }
 
         public void pagingDealListCrmid(List collections, Object corpId) throws InterruptedException {
-
-            LOG.info("开始执行pagingDealListCrmid,集合大小为===========》"+collections.size());
+            if (collections == null) {
+                return;
+            }
+            LOG.info("开始执行pagingDealListCrmid,集合大小为===========》" + collections.size());
             //删除关系eccrm_detail
             dealupdateCrmDetailByCorpId((Long) corpId, collections);
             //更新t_crm_relation
@@ -824,20 +825,20 @@ public class DiaodanServiceImpl implements DiaodanService {
             dealdeleteCrmShareRelation((Long) corpId, collections);
             //删除公司关系 t_crm_corp_relation
             deleteCrmCorpRelationCorpid((Long) corpId, collections);
-             //清除qq关系
+            //清除qq关系
             cleanQQrelactionShip((Long) corpId, collections);
             //清楚销售计划
             cleanCrmPan((Long) corpId, collections);
             //写入变更记录log表
-            writeChangeLog((Long) corpId, collections,loseCrmIds);
-           // 写ES
+            writeChangeLog((Long) corpId, collections, loseCrmIds);
+            // 写ES
             dealCrm2ES((Long) corpId, collections);
-           //  写轨迹
+            //  写轨迹
             dealCrm2nsq((Long) corpId, collections, loseCrmIds);
             //更新上限值
-            batchUpdateCrmLimit((Long) corpId, collections,loseCrmIds);
+            batchUpdateCrmLimit((Long) corpId, collections, loseCrmIds);
             //更新memecache
-            batchUpdateMemcache((Long) corpId, collections,loseCrmIds);
+            batchUpdateMemcache((Long) corpId, collections, loseCrmIds);
         }
     }
 
