@@ -29,7 +29,7 @@ public class ThriftClient {
         try {
             if (client == null) {
                 if (tTransport == null) {
-                    TSocket tSocket = new TSocket(thriftProperties.host, thriftProperties.port, 30 * 1000); //读写超时时间10秒
+                    TSocket tSocket = new TSocket(thriftProperties.host, thriftProperties.port, 300 * 1000); //读写超时时间10秒
                     tTransport = new TFramedTransport(tSocket);
                 }
                 tTransport.open();
