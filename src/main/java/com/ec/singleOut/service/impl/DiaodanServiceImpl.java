@@ -721,6 +721,7 @@ public class DiaodanServiceImpl implements DiaodanService {
             udpClientSocket = new UDPClientSocket();
             //封装loseRecordEntity数据
            for (CrmLoseRuleEntity crmLoseRuleEntity : totalcCoprids) {
+                loseRecordEntities.clear();
                 long corpid = crmLoseRuleEntity.getF_crop_id();
                 crmDetailEntities = searcherWillDeadLineDiaodanCrmIdByCorpId(48, corpid); // 即将调单的
                 if (crmDetailEntities == null) {
