@@ -119,9 +119,12 @@ public class CollectionUtil {
         List<CrmDetailEntity> crmDetailEntities1 = new ArrayList<CrmDetailEntity>();
         for (CrmDetailEntity crmDetailEntity : crmDetailEntities) {
             long crmId = crmDetailEntity.getF_crm_id();
+            LOG.info("=======come in inCrmDetailNotIncontactTime=  for 1===========");
             for (CrmContactTimeEntity crmContactTimeEntity : crmContactTimeEntities) {
+                LOG.info("=======come in inCrmDetailNotIncontactTime=  for 2===========");
                 long contactCrmId = crmContactTimeEntity.getF_crm_id();
                 if (crmId == contactCrmId && !crmDetailEntities1.contains(crmDetailEntity)) {
+                    LOG.info("=======come in inCrmDetailNotIncontactTime=  for if===========");
                     crmDetailEntities1.add(crmDetailEntity);
                     break;
                 }
