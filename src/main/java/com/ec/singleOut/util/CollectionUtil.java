@@ -115,7 +115,28 @@ public class CollectionUtil {
 
 
     public static List<CrmDetailEntity> inCrmDetailNotIncontactTime(List<CrmDetailEntity> crmDetailEntities, List<CrmContactTimeEntity> crmContactTimeEntities) {
-        LOG.info("=======come in inCrmDetailNotIncontactTime============");
+
+        Map<Long, CrmDetailEntity> maps = new HashMap<>();
+        List<CrmDetailEntity> crmDetailEntities1 = new ArrayList<CrmDetailEntity>();
+        for (CrmDetailEntity crmDetailEntity : crmDetailEntities) {
+            maps.put(crmDetailEntity.getF_crm_id(), crmDetailEntity);
+        }
+        for (CrmContactTimeEntity crmContactTimeEntity : crmContactTimeEntities) {
+           /* LOG.info("=======come in inCrmDetailNotIncontactTime=  for 2===========");
+            long contactCrmId = crmContactTimeEntity.getF_crm_id();
+            if (crmId == contactCrmId && !crmDetailEntities1.contains(crmDetailEntity)) {
+                LOG.info("=======come in inCrmDetailNotIncontactTime=  for if===========");
+                crmDetailEntities1.add(crmDetailEntity);
+                break;
+            }*/
+            long crmid = crmContactTimeEntity.getF_crm_id();
+            if (maps.containsKey(crmid)) {
+                crmDetailEntities1.add(maps.get(crmid));
+            }
+        }
+
+
+     /*   LOG.info("=======come in inCrmDetailNotIncontactTime============");
         List<CrmDetailEntity> crmDetailEntities1 = new ArrayList<CrmDetailEntity>();
         for (CrmDetailEntity crmDetailEntity : crmDetailEntities) {
             long crmId = crmDetailEntity.getF_crm_id();
@@ -129,7 +150,7 @@ public class CollectionUtil {
                     break;
                 }
             }
-        }
+        }*/
         LOG.info("=======go out come in inCrmDetailNotIncontactTime============");
         crmDetailEntities.removeAll(crmDetailEntities1);
         LOG.info("=======after remove go out come in inCrmDetailNotIncontactTime============");
