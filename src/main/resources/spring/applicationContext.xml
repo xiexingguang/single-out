@@ -14,7 +14,7 @@
 	<!-- 开启事务注解驱动 -->  
     <tx:annotation-driven />
     <context:component-scan base-package="com.ec.singleOut.dao" />
-    <context:component-scan base-package="com.ec.singleOut.thrift.client" />
+    <context:component-scan base-package="com.ec.singleOut.thrift" />
     <context:component-scan base-package="com.ec.singleOut.nsq" />
     <context:component-scan base-package="com.ec.singleOut.service" />
     <context:component-scan base-package="com.ec.singleOut.redis" />

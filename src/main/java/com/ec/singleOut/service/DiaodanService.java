@@ -55,7 +55,7 @@ public interface  DiaodanService {
      * @param crmIds
      * @param stage 表示上一次调单执行到的阶段
      */
-    public void dealFail2DeadLineCrmId(long corpid, List<Long> crmIds, int stage)throws InterruptedException;
+    public void dealFail2DeadLineCrmId(long corpid, List<Long> crmIds, int stage)throws Exception;
 
 
     /**

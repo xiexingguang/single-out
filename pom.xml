@@ -51,6 +51,7 @@
         <trendrr.nsq.client.version>1.2</trendrr.nsq.client.version>
         <trendrr-oss.version>1.0</trendrr-oss.version>
         <netty.version>3.6.10.Final</netty.version>
+        <commons-pool.version>1.6</commons-pool.version>
     </properties>
 
     <dependencies>
@@ -246,6 +247,13 @@
             <groupId>com.lmax</groupId>
             <artifactId>disruptor</artifactId>
             <version>3.3.2</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>commons-pool</groupId>
+            <artifactId>commons-pool</artifactId>
+            <version>${commons-pool.version}</version>
         </dependency>
 
         <!-- logging -->

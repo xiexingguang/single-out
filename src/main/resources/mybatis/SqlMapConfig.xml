@@ -8,6 +8,7 @@
     <typeAliases>
         <typeAlias type="com.ec.singleOut.entity.CrmLoseRuleEntity" alias="crmLoseRule" />
         <typeAlias type="com.ec.singleOut.entity.LoseRecordEntity" alias="loseRecord" />
+        <typeAlias type="com.ec.singleOut.bean.EsTask" alias="estask" />
     </typeAliases>
 
     <!-- 这里可以写多个实体的映射文件 -->
@@ -30,6 +31,7 @@
         <mapper resource="mybatis/NSQTaskMap.xml" />
         <mapper resource="mybatis/CrmClass.xml" />
         <mapper resource="mybatis/CrmLoseRecord.xml" />
+        <mapper resource="mybatis/EsTaskMap.xml" />
         <!--
         <mapper resource="mybatis/CrmCorpDetail.xml" />
         <mapper resource="mybatis/CrmDetail.xml" />

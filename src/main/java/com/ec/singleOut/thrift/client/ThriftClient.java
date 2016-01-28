@@ -10,12 +10,11 @@ import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Created by ecuser on 2015/12/31.
  */
-@Component
+
 public class ThriftClient {
 
     private static TTransport tTransport;

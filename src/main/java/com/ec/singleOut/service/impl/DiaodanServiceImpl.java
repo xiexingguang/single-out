@@ -1,7 +1,9 @@
 package com.ec.singleOut.service.impl;
+
 import com.alibaba.fastjson.JSON;
 import com.ec.singleOut.Constants.DiaodanConstants;
 import com.ec.singleOut.bean.Crmclass;
+import com.ec.singleOut.bean.EsTask;
 import com.ec.singleOut.bean.LoseCrmId;
 import com.ec.singleOut.core.AbstractPagingHandler;
 import com.ec.singleOut.core.SingleOutContext;
@@ -14,12 +16,11 @@ import com.ec.singleOut.nsq.NsqHandler;
 import com.ec.singleOut.properties.ConfigProperties;
 import com.ec.singleOut.redis.RedisTemplate;
 import com.ec.singleOut.service.DiaodanService;
+import com.ec.singleOut.thrift.ThriftClient;
 import com.ec.singleOut.thrift.api.EsProxyService;
-import com.ec.singleOut.thrift.client.ThriftClient;
 import com.ec.singleOut.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.thrift.TException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +31,7 @@ import java.util.Map;
 
 /**
  * Created by xxg on 2015/12/28.
+ *
  */
 @Component("singleOUtService")
 public class DiaodanServiceImpl implements DiaodanService {
@@ -76,11 +78,16 @@ public class DiaodanServiceImpl implements DiaodanService {
     @Autowired
     private DiaodanDao diaodanDao;
 
+   @Autowired
+    private EsTaskDao esTaskDao;
 
     @Autowired
     private NsqHandler nsqHandler;
     @Autowired
     private ThriftClient thriftClient;
+
+
+
     @Autowired
     private ConfigProperties configProperties;
 
@@ -343,23 +350,23 @@ public class DiaodanServiceImpl implements DiaodanService {
      * @param corpid
      */
     public void dealDeadLineDiaodanCrmIdByCorpId(long corpid) {
-
+        long beginTime = System.currentTimeMillis();
         LOG.info("【deal  lose crimid】 corpid : " + corpid + "开始执行掉单");
         //查出掉单的crmid，这个掉单的crmid，数量可能巨大
         List<CrmDetailEntity> crmDetailEntities = searcherWillDeadLineDiaodanCrmIdByCorpId(0, corpid);
         if (crmDetailEntities == null || crmDetailEntities.size() == 0) {
-            LOG.warn("corpId :" + corpid +", have no lose crm ids");
+            LOG.warn("corpId :" + corpid + ", have no lose crm ids");
             return;
         }
-        LOG.info("【deal  lose crimid】 ,企业 ：" + corpid  +" 下 掉单的 客户数量为 ：" + crmDetailEntities.size());
+        LOG.info("【deal  lose crimid】 ,企业 ：" + corpid + " 下 掉单的 客户数量为 ：" + crmDetailEntities.size() +"筛选符合掉单规则客户时间:"+(System.currentTimeMillis()-beginTime) +"毫秒");
 
         //日志 跟踪
-        Map<Long/**usr_id**/, List<CrmDetailEntity>> map = CollectionUtil.generateUserIdWithCrmIds(crmDetailEntities);
+       /* Map<Long*//**usr_id**//*, List<CrmDetailEntity>> map = CollectionUtil.generateUserIdWithCrmIds(crmDetailEntities);
         for (Map.Entry<Long, List<CrmDetailEntity>> entry : map.entrySet()) {
             long usrId = entry.getKey();
             List<CrmDetailEntity> crmids = entry.getValue();
-            LOG.info("企业id为: ===>"+ corpid  + " 用户id 为 : ==>" + usrId +" 该用户下的掉单的客户数量为：" + crmids.size() +" 掉单客户详情为 ===》" + JSON.toJSONString(crmids));
-        }
+            LOG.info("企业id为: ===>"+ corpid  + " 用户id 为 : ==>" + usrId +" 该用户下的掉单的客户数量为：" + crmids.size() );
+        }*/
 
         //转换CrmDetailEntity ==> long  类型,该企业下的调单crmid
         List<Long> ids = CollectionUtil.convertListCrmDetail2Long(crmDetailEntities);
@@ -378,15 +385,15 @@ public class DiaodanServiceImpl implements DiaodanService {
                 Map<Long/**usr_id**/, List<CrmDetailEntity>> userIdCrmMap = CollectionUtil.generateUserIdWithCrmIds(crmDetailEntities);
                 for (Map.Entry<Long, List<CrmDetailEntity>> entry : userIdCrmMap.entrySet()) {
                     long usrId = entry.getKey();
-                    final  String updataMessage = String.format("type=411+succnum=%d", 0);
+                    final String updataMessage = String.format("type=411+succnum=%d", 0);
                     LOG.info(String.format("【deail ose crimid】通知 IM Server: userId=%1s, message=[%2s]", String.valueOf(usrId), updataMessage));
                     byte[] tipsDataPacket = Packet.packet(usrId, updataMessage);
                     udpClientSocket.send(configProperties.IM_HOST, configProperties.IM_PORT, tipsDataPacket);
                 }
             }
         } catch (Exception e) {
-                LOG.error("【deail ose crimid】  ,fail to send notice to the IM server ,the corpid is :" + corpid ,e);
-        }finally {
+            LOG.error("【deail ose crimid】  ,fail to send notice to the IM server ,the corpid is :" + corpid, e);
+        } finally {
             udpClientSocket.close();
         }
 
@@ -399,7 +406,7 @@ public class DiaodanServiceImpl implements DiaodanService {
      * @param stage 表示上一次调单执行到的阶段
      * @throws InterruptedException
      */
-    public void dealFail2DeadLineCrmId(long corpid, List<Long> crmIds, int stage) throws InterruptedException {
+    public void dealFail2DeadLineCrmId(long corpid, List<Long> crmIds, int stage) throws Exception {
 
         LOG.info("后台线程，开始执行掉单失败的crmIds, copriD:" + corpid +"掉单的crmIds 为 ：" + JSON.toJSONString(crmIds));
         //查询该企业下的所有crmId
@@ -606,7 +613,7 @@ public class DiaodanServiceImpl implements DiaodanService {
 
        final  List<CrmLoseRuleEntity> totalcCoprids = searcherSetDiaodanCorpIds();
         LOG.info("【deal lose crimid】, 扫描设置的掉单企业数为 ：" + " size :" + totalcCoprids.size() + "detail info :" + JSON.toJSONString(totalcCoprids));
-        if (client == null) {
+     /*   if (client == null) {
             for(int i=0; i<3;i++){
                 client = thriftClient.getThriftClient();  //初始化thrift,重试3次，有可能是网络问题
                 if (client != null) {
@@ -623,7 +630,7 @@ public class DiaodanServiceImpl implements DiaodanService {
         if (client == null) {
             LOG.error("fail to init thrift client , will fail to deal ES ");
             throw new RuntimeException("fail to connect the  ES,will not to deal diao dan service");
-        }
+        }*/
 
         //线程，异步处理。拿到corpids,批量处理
         new Thread(new Runnable() {
@@ -636,7 +643,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                         } catch (Exception e) {
                             LOG.error("call back task ,fail to update task  ", e);
                         }finally{
-                           thriftClient.close();
+                        //   thriftClient.close();
                         }
                     }
                 });
@@ -1125,7 +1132,7 @@ public class DiaodanServiceImpl implements DiaodanService {
    //　批量更新ES
     private void dealCrm2ES(long corpID, List<Long> crmIds) throws InterruptedException{
 
-        try {
+       /* try {
             if (crmIds == null || crmIds.size() == 0) {
                 LOG.warn("write 2 es ,corpId :" + corpID +"have no lose crmIds");
                 return;
@@ -1145,9 +1152,9 @@ public class DiaodanServiceImpl implements DiaodanService {
                     }
                 }
                 if (client == null) {
-                    LOG.error("fail to init thrift client , will fail to deal ES ");
-                    throw new RuntimeException("fail to connect the  ES,will not to deal diao dan service");
-                }
+                LOG.error("fail to init thrift client , will fail to deal ES ");
+                throw new RuntimeException("fail to connect the  ES,will not to deal diao dan service");
+            }
 
             LOG.info("【deal lose crimid】 begin write crm 2 ES............. [coprid] " + corpID);
             client.batchInsertOrUpdate(corpID, crmIds);
@@ -1163,7 +1170,37 @@ public class DiaodanServiceImpl implements DiaodanService {
                 LOG.warn("............crmId队已满..............");
             }
             throw new RuntimeException("【deal lose crimid】 fail to write ES  By CorpId",e);
+        }*/
+
+        try {
+            LOG.info("corpId = " + corpID + ", 通知ES更新数据条数: " + crmIds.size());
+            thriftClient.notifyES(corpID, crmIds, 3);
+            LOG.info("corpId = " + corpID + ", 通知ES更新数据结束， 数据条数: " + crmIds.size());
+        } catch (Exception e) {
+            Logger thriftLog = LogManager.getLogger("thriftLog");
+            thriftLog.error("通知ES更新数据失败！,将数据写数据库", e);
+            try {
+                EsTask esTask = new EsTask();
+                String crmIdsString = StringUtil.listToString(crmIds, ",");
+                long now = System.currentTimeMillis();
+                String timestamp = String.valueOf(now).substring(0, 10);
+                esTask.setF_corp_id(corpID);
+                esTask.setF_crm_ids(crmIdsString);
+                esTask.setF_from(2); // 2java
+                esTask.setF_status(0); // 0未处理
+                esTask.setF_type(4); // batchInsertOrUpdate
+                esTask.setF_user_id(0);
+                esTask.setF_time(Integer.valueOf(timestamp));
+                esTaskDao.saveEsTask(esTask);
+            } catch (Exception e1) {
+                LOG.error("将ES更新数据写数据库失败", e1);
+            }
+            LOG.error("通知ES更新数据失败！,将数据写数据库结束");
         }
+
+
+
+
     }
     // 写轨迹到nsq
 
