@@ -133,7 +133,7 @@ public class DiaodanServiceImpl implements DiaodanService {
 
         // 线上放开
 
-      /*  try {
+        try {
             crm2 = crmLoseRuleDao.searcherRulesFromCrm2();
             LOG.info("crm2 corpid size :" + crm2.size());
             totalcCoprids.addAll(crm2);
@@ -147,7 +147,7 @@ public class DiaodanServiceImpl implements DiaodanService {
             totalcCoprids.addAll(crm3);
         } catch (Exception e) {
             LOG.error("fail to get the lose corpId from crm3 ",e);
-        }*/
+        }
         // log
         LOG.info("total corpid size :" + totalcCoprids.size());
         return totalcCoprids;
@@ -613,6 +613,27 @@ public class DiaodanServiceImpl implements DiaodanService {
 
        final  List<CrmLoseRuleEntity> totalcCoprids = searcherSetDiaodanCorpIds();
         LOG.info("【deal lose crimid】, 扫描设置的掉单企业数为 ：" + " size :" + totalcCoprids.size() + "detail info :" + JSON.toJSONString(totalcCoprids));
+        List<CrmLoseRuleEntity> needRemove = new ArrayList<>();
+      //  List<CrmLoseRuleEntity> testCoprids = new ArrayList<>();
+        if(totalcCoprids!=null) {
+            if (configProperties.IS_OPEN_TEST.equalsIgnoreCase("yes")) {
+                long corp0 = configProperties.TEST_CORPID;
+                long corp1 = configProperties.TEST_CORPID1;
+                for (CrmLoseRuleEntity crmLoseRuleEntity : totalcCoprids) {
+                    long coprid = crmLoseRuleEntity.getF_crop_id();
+                    if (coprid != corp0 && coprid != corp1) {
+                        needRemove.add(crmLoseRuleEntity);
+                    }
+                }
+                totalcCoprids.removeAll(needRemove);
+            }
+            LOG.info("test corpid :" + JSON.toJSONString(totalcCoprids));
+        }
+
+        if (totalcCoprids == null || totalcCoprids.size() == 0) {
+            LOG.info("【deal lose crimid】 finished deal will lose crm , have no coprid set lose rule");
+            return;
+        }
      /*   if (client == null) {
             for(int i=0; i<3;i++){
                 client = thriftClient.getThriftClient();  //初始化thrift,重试3次，有可能是网络问题
@@ -635,6 +656,8 @@ public class DiaodanServiceImpl implements DiaodanService {
         //线程，异步处理。拿到corpids,批量处理
         new Thread(new Runnable() {
             public void run() {
+
+
                 dealDeadLineDiaodanCrmIdsByCorpIds(totalcCoprids, new TaskCallBack() {
                     public void notifyTaskTheResultOfcallService(TaskEntity entity) {
                         try {
@@ -670,10 +693,29 @@ public class DiaodanServiceImpl implements DiaodanService {
         task.setTaskPath(configProperties.DEAL_WILL_LOSE_PATH);
         try {
             List<CrmLoseRuleEntity> totalcCoprids = searcherSetDiaodanCorpIds();
+            List<CrmLoseRuleEntity> needRemove = new ArrayList<>();
+
+            if (totalcCoprids != null) {
+                //  List<CrmLoseRuleEntity> testCoprids = new ArrayList<>();
+                if (configProperties.IS_OPEN_TEST.equalsIgnoreCase("yes")) {
+                    long corp0 = configProperties.TEST_CORPID;
+                    long corp1 = configProperties.TEST_CORPID1;
+                    for (CrmLoseRuleEntity crmLoseRuleEntity : totalcCoprids) {
+                        long coprid = crmLoseRuleEntity.getF_crop_id();
+                        if (coprid != corp0 && coprid != corp1) {
+                            needRemove.add(crmLoseRuleEntity);
+                        }
+                    }
+                    totalcCoprids.removeAll(needRemove);
+                }
+                LOG.info("test corpid :" + JSON.toJSONString(totalcCoprids));
+            }
+
             if (totalcCoprids == null || totalcCoprids.size() == 0) {
                 LOG.info("【scan will lose crimid】 finished deal will lose crm , have no coprid set lose rule");
                 return;
             }
+
             LOG.info("【scan will lose crimid】, 扫描设置的掉单企业数为 ：" + " size :" + totalcCoprids.size() +  "detail info :" +JSON.toJSONString(totalcCoprids) );
             List<LoseRecordEntity> loseRecordEntities = new ArrayList<LoseRecordEntity>();
             udpClientSocket = new UDPClientSocket();

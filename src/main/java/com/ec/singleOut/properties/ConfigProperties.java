@@ -21,5 +21,11 @@ public class ConfigProperties {
     public int IM_PORT;
     @Value("${operations.number}")
     public int OPEAATION_NUMBER;
+    @Value("${single-out.test}")
+    public String IS_OPEN_TEST;
+    @Value("${single-out.corpid}")
+    public long TEST_CORPID;
+    @Value("${single-out.corpid1}")
+    public long TEST_CORPID1;
 
 }
