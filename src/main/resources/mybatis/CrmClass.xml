@@ -6,7 +6,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 <!-- namespace用于java代码调用时识别指定xml的mapper文件 -->
 <mapper namespace="crmClass">
-    <select id="crmClass.findCrmClassByCorpId">
+
+    <resultMap id="crmclassMap" type="com.ec.singleOut.bean.Crmclass">
+        <result property="classId" column="f_class_id"/>
+    </resultMap>
+
+    <select id="crmClass.findCrmClassByCorpId" resultMap="crmclassMap">
 
         select f_class_id  from
         d_ec_crm.t_crm_class

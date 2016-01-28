@@ -1,11 +1,15 @@
 package com.ec.singleOut.util;
 
 import com.alibaba.fastjson.JSON;
+import com.ec.singleOut.bean.Crmclass;
 import com.ec.singleOut.entity.CrmContactTimeEntity;
 import com.ec.singleOut.entity.CrmDetailEntity;
 import com.ec.singleOut.entity.CrmchangeLogEntity;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by jasshine_xxg on 2016/1/2.
@@ -124,44 +128,43 @@ public class CollectionUtil {
         return crmDetailEntities;
     }
 
-
+    /**
+     *  判断标签 是否在企业标签下
+     * @param tags  规则下的标签
+     * @param crms 企业标签
+     * @return
+     */
+    public static String[] filterClassTags(String[] tags,List<Crmclass> crms) {
+        List<String> tagLists = new ArrayList<>();
+        for (String tag : tags) {
+            if (tag.equalsIgnoreCase("0")) {
+                tagLists.add(tag);
+                continue;
+            }
+            for (Crmclass crmclass : crms) {
+                long classId = crmclass.getClassId();
+                String stringClassId = classId + "";
+                if (tag.equalsIgnoreCase(stringClassId)) {
+                    tagLists.add(tag);
+                    break;
+                }
+            }
+        }
+        System.out.println(JSON.toJSON(tagLists));
+        return (String[]) tagLists.toArray(new String[tagLists.size()]);
+    }
 
 
     public static void main(String[] args) {
-        CrmDetailEntity crmDetailEntity = new CrmDetailEntity();
-        crmDetailEntity.setF_corp_id(20);
-        crmDetailEntity.setF_crm_id(20);
+        String[] tags = {"2", "4", "5","0"};
+        List<Crmclass> crms = new ArrayList<>();
 
-        CrmDetailEntity crmDetailEntity1 = new CrmDetailEntity();
-        crmDetailEntity1.setF_corp_id(30);
-        crmDetailEntity1.setF_crm_id(30);
+      /*  crms.add(new Crmclass().setClassId(2));
+        crms.add(new Crmclass().setClassId(4));
+        crms.add(new Crmclass().setClassId(8));
+        crms.add(new Crmclass().setClassId(154));*/
 
-        CrmDetailEntity crmDetailEntity2 = new CrmDetailEntity();
-        crmDetailEntity2.setF_corp_id(40);
-        crmDetailEntity2.setF_crm_id(40);
-
-
-        CrmDetailEntity crmDetailEntity3 = new CrmDetailEntity();
-        crmDetailEntity.setF_corp_id(20);
-        crmDetailEntity.setF_crm_id(20);
-
-        List<CrmDetailEntity> crmDetailEntities = new ArrayList<CrmDetailEntity>();
-        crmDetailEntities.add(crmDetailEntity);
-        crmDetailEntities.add(crmDetailEntity1);
-        crmDetailEntities.add(crmDetailEntity2);
-
-        List<CrmContactTimeEntity> crmDetailEntities2 = new ArrayList<CrmContactTimeEntity>();
-        CrmContactTimeEntity crmContactTimeEntity = new CrmContactTimeEntity();
-        crmContactTimeEntity.setF_crm_id(20);
-        CrmContactTimeEntity crmContactTimeEntity2 = new CrmContactTimeEntity();
-        crmContactTimeEntity2.setF_crm_id(60);
-        crmDetailEntities2.add(crmContactTimeEntity);
-        crmDetailEntities2.add(crmContactTimeEntity2);
-
-
-        System.out.println(JSON.toJSON(inCrmDetailNotIncontactTime(crmDetailEntities, crmDetailEntities2)));
-
-
+        System.out.println(filterClassTags(tags,crms));
     }
 
 

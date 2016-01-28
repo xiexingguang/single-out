@@ -1,6 +1,7 @@
 package com.ec.singleOut.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.ec.singleOut.Constants.DiaodanConstants;
+import com.ec.singleOut.bean.Crmclass;
 import com.ec.singleOut.bean.LoseCrmId;
 import com.ec.singleOut.core.AbstractPagingHandler;
 import com.ec.singleOut.core.SingleOutContext;
@@ -35,7 +36,7 @@ public class DiaodanServiceImpl implements DiaodanService {
 
     private final Logger LOG = LogManager.getLogger("loseCrmService");
     private final Logger RECORD_FAIL_LOG = LogManager.getLogger("recordLoseCrmId");
-
+    private final Logger DEBUG = LogManager.getLogger("logtrail");
     @Autowired
     private CrmLoseRuleDao crmLoseRuleDao;
     @Autowired
@@ -64,7 +65,8 @@ public class DiaodanServiceImpl implements DiaodanService {
     private MemcachedDao memcachedDao;
     @Autowired
     private CrmDetailClassDao crmDetailClassDao;
-
+    @Autowired
+    private CrmClassDao crmClassDao;
     @Autowired
     private RedisTemplate redisTemplate;
 
@@ -203,7 +205,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                 final long usrs_id = entity.getF_user_id();
                 long day2lose = DateUtil.convertStringDate2LongDate(lose_time) - currentTime;
                 //log
-                LOG.info("规则1条件过滤，企业id ：" + corpid + " , 客户id为 ：" + entity.getF_crm_id() + "===========> 掉单时间 ==》" + lose_time);
+                DEBUG.info("规则1条件过滤，企业id ：" + corpid + " , 客户id为 ：" + entity.getF_crm_id() + "===========> 掉单时间 ==》" + lose_time);
                 // 即将掉单的
                 if (timeInterval != 0) {
                     String rember_time = DateUtil.removeDateOfHour(lose_time, timeInterval);
@@ -229,7 +231,6 @@ public class DiaodanServiceImpl implements DiaodanService {
             if (contact2 != 0 || updateNo != 0) {
                 //这里面查询出来的crmid,可能在
                 List<CrmContactTimeEntity> crmContactTimeEntities = crmContactTimeDao.findCrmOpearationTypeInEffecitiveCallWays(corpid, contact_type);
-                System.out.println(JSON.toJSON(crmContactTimeEntities));
                 for (int i = 0; i < crmContactTimeEntities.size(); i++) {
                     CrmContactTimeEntity crmContactTimeEntity = crmContactTimeEntities.get(i);
                     String contactTime = crmContactTimeEntity.getF_contact_time(); //客户最新操作时间
@@ -247,7 +248,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                     long day2lose = DateUtil.convertStringDate2LongDate(lose_time) - currentTime;
 
                     //log
-                    LOG.info("规则2，3  过滤 企业id ：" + corpid + " , 客户id为 ：" + crmContactTimeEntity.getF_crm_id() + "===========> 掉单时间 ==》" + lose_time);
+                    DEBUG.info("规则2，3  过滤 企业id ：" + corpid + " , 客户id为 ：" + crmContactTimeEntity.getF_crm_id() + "===========> 掉单时间 ==》" + lose_time);
 
                     if (timeInterval != 0) {           // 查询的是即将timeInterval时间间隔掉单的crmId
                         final String rember_time = DateUtil.removeDateOfHour(lose_time, timeInterval);
@@ -292,8 +293,16 @@ public class DiaodanServiceImpl implements DiaodanService {
             LOG.info("只针对已掉单的，筛选crmid，没有任何有效联系方式，筛选后crmids size为:" + crmDetailEntities.size());
         }*/
         // 筛选数据，比如去重，以及 筛选，条件中有自定义标签的，即f_tag_set !=""的
-        if (f_tag_set != null && !f_tag_set.equals("")) {
+        List<Crmclass> crmClassTags = crmClassDao.findCorpClassIdByCorpId(corpid); // 企业下的标签
+        if (f_tag_set != null && !f_tag_set.equals("")&& crmClassTags!=null && crmClassTags.size() >0) {
             String[] tags = f_tag_set.split(",");
+
+            //String
+            //标签过滤，有可能规则中的标签不在，或者只有一个在范围内
+            if (crmClassTags != null) {
+                tags =CollectionUtil.filterClassTags(tags, crmClassTags);
+              //  System.out.println("过滤后标签为：" + JSON.toJSONString(tags));
+            }
             List<CrmDetailEntity> noTagsCrm = null;
             boolean isNeedAddNotagCrm = false;
             //首先要从满足掉单条件筛选无标签的crmid，必须在前面。
@@ -301,7 +310,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                 if (tag.equals(DiaodanConstants.NO_TAG)) {  //表示标签规则中设置了无标签
                     isNeedAddNotagCrm = true;
                     List<Long> noTagsCrmLong = new ArrayList<>();
-                    if(crmDetailEntities != null && crmDetailEntities.size() > 0) {
+                    if (crmDetailEntities != null && crmDetailEntities.size() > 0) {
                         // List<Long> noTagsCrmLong = crmRelationDao.searcherCrmIdHasNoSetTag(corpid, crmDetailEntities); // 筛选无标签的crmid
                         for (CrmDetailEntity crmDetailEntity : crmDetailEntities) {
                             long crmid = crmDetailEntity.getF_crm_id();
@@ -315,14 +324,10 @@ public class DiaodanServiceImpl implements DiaodanService {
                     }
                 }
             }
-
             //标签过滤
-
             remvoeDuplicateCrmIdAndfilterNotContainTag(crmDetailEntities, tags);
             LOG.info("..................开始标签过滤筛选，筛选后..................crmids size为:" + crmDetailEntities.size());
-
             //rule设置了无标签客户也需要掉单
-
             if (isNeedAddNotagCrm && noTagsCrm != null) {
                 crmDetailEntities.addAll(noTagsCrm);
                 LOG.info(".................开始无标签筛选，筛选后.........................crmids size为:" + crmDetailEntities.size());
@@ -763,6 +768,9 @@ public class DiaodanServiceImpl implements DiaodanService {
 
 
     private void remvoeDuplicateCrmIdAndfilterNotContainTag(List<CrmDetailEntity> crmDetailEntities,String[] tags) {
+        if (tags == null || tags.length == 0) {
+            return;
+        }
         List<CrmDetailEntity> needFilter = new ArrayList<CrmDetailEntity>();
         for (CrmDetailEntity crmDetailEntity : crmDetailEntities) {
             long crmid = crmDetailEntity.getF_crm_id();
@@ -1019,6 +1027,8 @@ public class DiaodanServiceImpl implements DiaodanService {
             crmChangeLogDao.updateCrmChangeLog(corpId, changeLogs);
             crmChangeOnceDao.updateCrmChangeOnce(corpId, changeLogs);
             crmChangeDao.updateCrmChange(corpId, changeLogs);
+            //测试用
+           // throw new RuntimeException("write changelog fail....");
         } catch (Exception e) {
             LOG.error("fail to wite changeLog  ,the corpId is"+ corpId +",the crmIds size is :" + crmIds.size(),e);
             LoseCrmId crmId = new LoseCrmId();

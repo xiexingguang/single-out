@@ -1,5 +1,6 @@
 package com.ec.singleOut.dao;
 
+import com.ec.singleOut.bean.Crmclass;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -12,7 +13,7 @@ import java.util.Map;
 @Component
 public class CrmClassDao extends  BaseDaoSupport {
 
-    public List<Integer> findCorpClassIdByCorpId(long corpId) {
+    public List<Crmclass> findCorpClassIdByCorpId(long corpId) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("corpId", corpId);
         return getCrmSqlSession(corpId).selectList("crmClass.findCrmClassByCorpId", map);
