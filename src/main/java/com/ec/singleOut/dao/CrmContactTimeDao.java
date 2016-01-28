@@ -43,7 +43,7 @@ public class CrmContactTimeDao extends  BaseDaoSupport {
         map.put("corpId", coprid);
         map.put("type", effectiveType);
         List<CrmContactTimeEntity> crmContactTimeEntities  = getCrmSqlSession(coprid).selectList("contactTime.findNewestCrmContactTime",map);
-        LOG.debug("crmContactTimeEnity ===="+JSON.toJSON(crmContactTimeEntities));
+        LOG.info("crmContactTimeEnity ===="+crmContactTimeEntities.size());
         return crmContactTimeEntities;
     }
 

@@ -12,24 +12,27 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="f_corp_id" column="corpId"/>
         <result property="f_user_id" column="userId"/>
         <result property="f_create_Time" column="createTime"/>
+        <result property="f_step" column="fstep"/>
     </resultMap>
 
 
 	<select id="crmDetail.findCrmDetailsByCorpId" resultMap="crmDetailBean">
 		SELECT
-		f_crm_id crmId,f_create_time createTime,f_user_id userId,f_corp_id corpId
+		f_crm_id crmId,f_create_time createTime,f_user_id userId,f_corp_id corpId,f_step fstep
 		FROM
 		d_ec_crm.t_eccrm_detail
 		WHERE
         <if test="corpId!=null and corpId!=''">
 		f_corp_id=#{corpId} AND
         </if>
-		f_user_id!=0;
+		f_user_id!=0
+        AND
+        f_step!=4
 	</select>
 
     <select id="crmDetail.findCrmDetailByCorpIdAndCrmId" resultMap="crmDetailBean">
         SELECT
-        f_crm_id crmId,f_create_time createTime,f_user_id userId,f_corp_id corpId
+        f_crm_id crmId,f_create_time createTime,f_user_id userId,f_corp_id corpId,f_step fstep
         FROM
         d_ec_crm.t_eccrm_detail
         WHERE
@@ -38,6 +41,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
        AND f_crm_id = #{crmId}
 
        AND f_user_id > 0
+
+       AND f_step!=4
     </select>
 
     <update id="crmDetail.updateCrmDetailsByCrmIds">
@@ -71,6 +76,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and f_user_id!=0;
 
     </update>
+
+
+    <select id="getUserUploadLimitCount" resultType="Integer">
+    <![CDATA[
+		SELECT count(1)
+		FROM d_ec_crm.t_eccrm_detail as d
+		JOIN d_ec_crm.t_crm_relation as r
+		ON r.f_crm_id=d.f_crm_id
+		WHERE r.f_corp_id=#{corpId} and r.f_user_id=#{userId} and d.f_step<4;
+		 ]]>
+    </select>
+
 
 
 </mapper>

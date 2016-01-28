@@ -33,9 +33,21 @@
                 <Pattern>[single-out] %d - %X{reqid} - %C.%M -%-4r [%t] %-5p %x - %m%n</Pattern>
             </PatternLayout>
         </RollingRandomAccessFile>
-        
-        <RollingRandomAccessFile name="dataIssue" fileName="${filePathPrefix}/dataIssue.log" immediateFlush="true" append="true"
+
+        <RollingRandomAccessFile name="loseCrmService" fileName="${filePathPrefix}/dataIssue.log" immediateFlush="true" append="true"
             filePattern="${filePathPrefix}/$${date:yyyy-MM}/dataIssue-%d{yyyy-MM-dd}-%i.log">
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="100MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="50" />
+            <PatternLayout>
+                <Pattern>[single-out] %d - %X{reqid} - %C -%-4r [%t] %-5p %x - %m%n</Pattern>
+            </PatternLayout>
+        </RollingRandomAccessFile>
+
+        <RollingRandomAccessFile name="recordLoseCrmId" fileName="${filePathPrefix}/recordLoseCrmId.log" immediateFlush="true" append="true"
+                                 filePattern="${filePathPrefix}/$${date:yyyy-MM}/recordLoseCrmId-%d{yyyy-MM-dd}-%i.log">
             <Policies>
                 <TimeBasedTriggeringPolicy />
                 <SizeBasedTriggeringPolicy size="100MB" />
@@ -61,16 +73,26 @@
         <logger name="java.net" level="ERROR" ></logger>
         <logger name="net.sf.log4jdbc" level="ERROR" ></logger>
         <logger name="org.apache.mina" level="ERROR" ></logger>
-        <logger name="com.ec.singleOut" level="info" additivity="true">
-            <AppenderRef ref="dataIssue" />
-        </logger>
         <logger name="com.alibaba.dubbo" level="ERROR" ></logger>
         <logger name="org.apache.zookeeper" level="ERROR" ></logger>
 
         <Root level="info">
+            <AppenderRef ref="stdout" level="info" />
             <AppenderRef ref="error" level="ERROR"/>
             <AppenderRef ref="CONSOLE" />
         </Root>
+
+
+        <AsyncLogger name="recordLoseCrmId" level="info"
+                     includeLocation="true" additivity="true">
+            <AppenderRef ref="recordLoseCrmId" />
+        </AsyncLogger>
+
+        <AsyncLogger name="loseCrmService" level="info"
+                     includeLocation="true" additivity="true">
+            <AppenderRef ref="loseCrmService" />
+        </AsyncLogger>
+
 
     </Loggers>
 </Configuration>

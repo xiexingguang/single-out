@@ -22,4 +22,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             )
         </foreach>
     </update>
+
+    <delete id="loseRecordCrm.truncateLoseRecordCrm">
+        truncate table ${tableName}
+   </delete>
+
 </mapper>
