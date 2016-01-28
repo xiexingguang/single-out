@@ -28,9 +28,12 @@ public class ECNsqProducer {
     public  NSQProducer getBatchProducer(String topic, int batchSize) {
 
             LOG.info("初始化nsq生产者...topic=" + topic + "host=" + nsqProperties.nsqdHost + "   port= " + nsqProperties.port + " threadNum= " + nsqProperties.producerNum);
-            if (producer == null) {
-                producer = new NSQProducer();
-            }
+
+        if (producer == null) {
+            producer = new NSQProducer();
+        } else {
+            return producer;
+        }
             producer.addAddress(nsqProperties.nsqdHost , nsqProperties.port, nsqProperties.producerNum);
             producer.configureBatch(topic, new BatchCallback() {
                     public void batchSuccess(String topic, int num) {

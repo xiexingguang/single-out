@@ -39,12 +39,12 @@ public class NsqHandler {
 
         final String topic = nsqProperties.topic;
         final int nsqBatchSize = nsqProperties.nsqBatchSize;
-        NSQProducer nsqProducer = ecNsqProducer.getBatchProducer(topic, nsqBatchSize);
 
         try {
+            NSQProducer nsqProducer = ecNsqProducer.getBatchProducer(topic, nsqBatchSize);
             for (WriteNsqJson writeNsqJson : json) {
-                LOG.info("send customer trail to the nsq ,the trail is :" + JSON.toJSONString(writeNsqJson));
                 nsqProducer.produceBatch(topic, JSON.toJSONString(writeNsqJson).getBytes());
+                LOG.info("send customer trail to the nsq ,the trail is :" + JSON.toJSONString(writeNsqJson));
             }
             nsqProducer.flushBatches();
         } catch (Exception e) {
