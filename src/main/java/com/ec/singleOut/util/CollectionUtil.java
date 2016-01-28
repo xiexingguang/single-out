@@ -5,6 +5,8 @@ import com.ec.singleOut.bean.Crmclass;
 import com.ec.singleOut.entity.CrmContactTimeEntity;
 import com.ec.singleOut.entity.CrmDetailEntity;
 import com.ec.singleOut.entity.CrmchangeLogEntity;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +18,7 @@ import java.util.Map;
  */
 public class CollectionUtil {
 
-
+    private final static Logger LOG = LogManager.getLogger(CollectionUtil.class);
     public static List<Long> convertListCrmDetail2Long(List<CrmDetailEntity> crmDetailEntities) {
         List<Long> longsCrm = new ArrayList<Long>();
         for (CrmDetailEntity crmDetailEntity : crmDetailEntities) {
@@ -113,6 +115,7 @@ public class CollectionUtil {
 
 
     public static List<CrmDetailEntity> inCrmDetailNotIncontactTime(List<CrmDetailEntity> crmDetailEntities, List<CrmContactTimeEntity> crmContactTimeEntities) {
+        LOG.info("=======come in inCrmDetailNotIncontactTime============");
         List<CrmDetailEntity> crmDetailEntities1 = new ArrayList<CrmDetailEntity>();
         for (CrmDetailEntity crmDetailEntity : crmDetailEntities) {
             long crmId = crmDetailEntity.getF_crm_id();
@@ -124,7 +127,9 @@ public class CollectionUtil {
                 }
             }
         }
+        LOG.info("=======go out come in inCrmDetailNotIncontactTime============");
         crmDetailEntities.removeAll(crmDetailEntities1);
+        LOG.info("=======after remove go out come in inCrmDetailNotIncontactTime============");
         return crmDetailEntities;
     }
 
