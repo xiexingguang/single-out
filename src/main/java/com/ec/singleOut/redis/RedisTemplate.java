@@ -21,11 +21,13 @@ import java.util.List;
 @Component
 public interface RedisTemplate {
 
-    public String set(String key, String value);
 
-    public String set(String key, String value, int expireSecond);
 
-    public String get(String key);
+    public void set(String key, String value,long corpid);
+
+    public void set(long corpid,String key, String value, int expireSecond);
+
+    public String get(String key,long corpid);
 
     public Long del(String key);
 

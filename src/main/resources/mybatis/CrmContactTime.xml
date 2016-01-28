@@ -48,11 +48,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     where f_contact_time in (select max(f_contact_time)
 
-    from ${tableName} GROUP BY f_crm_id )
+    from ${tableName}
 
-    <if test="type!=null and type!=''">
-        and  f_type in ( ${type} )
-    </if>
+       <if test="type!=null and type!=''">
+           WHERE  f_type in ( ${type} )
+       </if>
+       GROUP BY f_crm_id )
 
     and f_corp_id = #{corpId} GROUP BY f_crm_id
 

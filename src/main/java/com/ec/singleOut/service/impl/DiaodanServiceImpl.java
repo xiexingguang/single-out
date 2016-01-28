@@ -203,7 +203,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                 final long usrs_id = entity.getF_user_id();
                 long day2lose = DateUtil.convertStringDate2LongDate(lose_time) - currentTime;
                 //log
-                LOG.debug("规则1条件过滤，企业id ：" + corpid + " , 客户id为 ：" + entity.getF_crm_id() + "===========> 掉单时间 ==》" + lose_time);
+                LOG.info("规则1条件过滤，企业id ：" + corpid + " , 客户id为 ：" + entity.getF_crm_id() + "===========> 掉单时间 ==》" + lose_time);
                 // 即将掉单的
                 if (timeInterval != 0) {
                     String rember_time = DateUtil.removeDateOfHour(lose_time, timeInterval);
@@ -229,6 +229,7 @@ public class DiaodanServiceImpl implements DiaodanService {
             if (contact2 != 0 || updateNo != 0) {
                 //这里面查询出来的crmid,可能在
                 List<CrmContactTimeEntity> crmContactTimeEntities = crmContactTimeDao.findCrmOpearationTypeInEffecitiveCallWays(corpid, contact_type);
+                System.out.println(JSON.toJSON(crmContactTimeEntities));
                 for (int i = 0; i < crmContactTimeEntities.size(); i++) {
                     CrmContactTimeEntity crmContactTimeEntity = crmContactTimeEntities.get(i);
                     String contactTime = crmContactTimeEntity.getF_contact_time(); //客户最新操作时间
@@ -246,7 +247,7 @@ public class DiaodanServiceImpl implements DiaodanService {
                     long day2lose = DateUtil.convertStringDate2LongDate(lose_time) - currentTime;
 
                     //log
-                    LOG.debug("规则2，3  过滤 企业id ：" + corpid + " , 客户id为 ：" + crmContactTimeEntity.getF_crm_id() + "===========> 掉单时间 ==》" + lose_time);
+                    LOG.info("规则2，3  过滤 企业id ：" + corpid + " , 客户id为 ：" + crmContactTimeEntity.getF_crm_id() + "===========> 掉单时间 ==》" + lose_time);
 
                     if (timeInterval != 0) {           // 查询的是即将timeInterval时间间隔掉单的crmId
                         final String rember_time = DateUtil.removeDateOfHour(lose_time, timeInterval);
@@ -1053,7 +1054,11 @@ public class DiaodanServiceImpl implements DiaodanService {
                 // 清除mc客户、公司分组统计缓存
                 String limitKey = DiaodanConstants.CRM_RDIS_KEY + usr_id;
                 int size = value.size();
-                redisTemplate.set(limitKey, redisTemplate.get(limitKey) + size);
+                String oldSize = redisTemplate.get(limitKey, corpid);
+                LOG.info("【deal lose crimid】redis before "+ oldSize +"===============> key is :" + limitKey);
+                String newValue = Integer.parseInt(oldSize) + size +"";
+                LOG.info("【deal lose crimid】redis after "+ newValue);
+                redisTemplate.set(corpid, limitKey,newValue,Integer.MAX_VALUE);
             }
         } catch (Exception e) {
             LOG.error("fail to  update redis crm  limit  ,the corpId is" + corpid + ",the crmIds size is :" + crmIds.size(), e);
