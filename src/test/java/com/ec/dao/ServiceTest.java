@@ -54,7 +54,7 @@ public class ServiceTest {
 
     @Test
     public void testDealLoseCrm() {
-        diaodanService.dealDeadLineDiaodanCrmIdByCorpId(5003399);
+        diaodanService.dealDeadLineDiaodanCrmIdByCorpId(59340);
     }
 
     @Test

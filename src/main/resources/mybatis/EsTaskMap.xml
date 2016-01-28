@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!-- namespace用于java代码调用时识别指定xml的mapper文件 -->
+<mapper namespace="com.ec.singleOut.bean.EsTask">
+
+	<insert id="saveEsTask">
+		INSERT into d_ec_sys.t_es_task (
+		f_corp_id,
+		f_crm_ids,
+		f_type,
+		f_time,
+		f_user_id,
+		f_status,
+		f_from
+		) VALUES (
+		#{f_corp_id},
+		#{f_crm_ids},
+		#{f_type},
+		#{f_time},
+		#{f_user_id},
+		#{f_status},
+		#{f_from}
+		)
+	</insert>
+
+    <insert id="batchSaveEsTask">
+        INSERT into d_ec_sys.t_es_task (
+        f_corp_id,
+        f_crm_ids,
+        f_type,
+        f_time,
+        f_user_id,
+        f_status,
+        f_from
+        )
+        VALUES
+        <foreach collection="list" item="item" index="index"
+            separator=",">
+            (
+            #{item.f_corp_id},
+	        #{item.f_crm_ids},
+	        #{item.f_type},
+	        #{item.f_time},
+	        #{item.f_user_id},
+	        #{item.f_status},
+	        #{item.f_from}
+	        )
+        </foreach>
+    </insert>
+</mapper>

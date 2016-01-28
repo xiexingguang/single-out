@@ -9,8 +9,7 @@ import com.ec.singleOut.json.WriteNsqJson;
 import com.ec.singleOut.nsq.ECNsqProducer;
 import com.ec.singleOut.nsq.NsqHandler;
 import com.ec.singleOut.redis.RedisTemplate;
-import com.ec.singleOut.thrift.api.EsProxyService;
-import com.ec.singleOut.thrift.client.ThriftClient;
+import com.ec.singleOut.thrift.ThriftClient;
 import com.ec.singleOut.util.DateUtil;
 import com.trendrr.nsq.NSQConsumer;
 import com.trendrr.nsq.NSQLookup;
@@ -62,8 +61,7 @@ public class DaoTest{
     @Autowired
     private CrmDetailClassDao crmDetailClassDao;
 
-    @Autowired
-    private ThriftClient thriftClient;
+
 
     @Autowired
     private NsqHandler nsqHandler;
@@ -83,11 +81,14 @@ public class DaoTest{
     @Autowired
     private CrmClassDao crmClassDao;
 
+    @Autowired
+    private ThriftClient thriftClient;
+
     @Test
     public void testCrmclass() {
 
-
-        System.out.println(JSON.toJSON(crmClassDao.findCorpClassIdByCorpId(60648L)));
+        System.out.println(thriftClient);
+       // System.out.println(JSON.toJSON(crmClassDao.findCorpClassIdByCorpId(60648L)));
     }
 
 
@@ -258,8 +259,8 @@ public class DaoTest{
         crmids.add(110178614L);
         crmids.add(110178744L);
         crmids.add(110178664L);
-        EsProxyService.Client client = thriftClient.getThriftClient();
-        client.batchInsertOrUpdate(corpid, crmids);
+     //   EsProxyService.Client client = thriftClient.getThriftClient();
+    //    client.batchInsertOrUpdate(corpid, crmids);
 
     }
 
