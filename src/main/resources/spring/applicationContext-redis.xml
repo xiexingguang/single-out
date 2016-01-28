@@ -57,9 +57,6 @@
 
 
 
-
-
-
     <bean id="connectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
         <property name="poolConfig" ref="poolConfig"></property>
         <property name="hostName" value="${redis.host}"></property>

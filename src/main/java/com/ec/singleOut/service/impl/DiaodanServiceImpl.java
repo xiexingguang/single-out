@@ -405,165 +405,165 @@ public class DiaodanServiceImpl implements DiaodanService {
         //查询该企业下的所有crmId
         List<CrmDetailEntity> crmDetailEntities = crmDetailDao.findCrmDetailsByCorpId(corpid);
         //定时扫描的时候在扫描一下已经掉单的crmid，
-        List<CrmDetailEntity> loseCrmIds = searcherWillDeadLineDiaodanCrmIdByCorpId(0, corpid);
+       // List<CrmDetailEntity> loseCrmIds = searcherWillDeadLineDiaodanCrmIdByCorpId(0, corpid);
 
-        List<Long> filterloseCrmds = CollectionUtil.filterHasNoLoseCrmId(loseCrmIds, crmIds);
+      //  List<Long> crmIds = CollectionUtil.filterHasNoLoseCrmId(loseCrmIds, crmIds);
 
         switch (stage) {
             case DiaodanConstants.UPDATE_DETAIL:
                 //删除关系eccrm_detail
-                dealupdateCrmDetailByCorpId(corpid, filterloseCrmds);
+                dealupdateCrmDetailByCorpId(corpid, crmIds);
                 //更新t_crm_relation
-                dealupdateCrmRleationByCorpId( corpid, filterloseCrmds);
+                dealupdateCrmRleationByCorpId( corpid, crmIds);
                 //删除共享t_crm_share_relation
-                dealdeleteCrmShareRelation(corpid, filterloseCrmds);
+                dealdeleteCrmShareRelation(corpid, crmIds);
                 //删除公司关系 t_crm_corp_relation
-                deleteCrmCorpRelationCorpid( corpid, filterloseCrmds);
+                deleteCrmCorpRelationCorpid( corpid, crmIds);
                 //清除qq关系
-                cleanQQrelactionShip( corpid, filterloseCrmds);
+                cleanQQrelactionShip( corpid, crmIds);
                 //清楚销售计划
-                cleanCrmPan( corpid, filterloseCrmds);
+                cleanCrmPan( corpid, crmIds);
                 //写入变更记录log表
-                writeChangeLog(corpid, filterloseCrmds,crmDetailEntities);
+                writeChangeLog(corpid, crmIds,crmDetailEntities);
                 // 写ES
-                dealCrm2ES( corpid, filterloseCrmds);
+                dealCrm2ES( corpid, crmIds);
                 //  写轨迹
-                dealCrm2nsq(corpid, filterloseCrmds, crmDetailEntities);
+                dealCrm2nsq(corpid, crmIds, crmDetailEntities);
                 //更新上限值
-                batchUpdateCrmLimit(corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateCrmLimit(corpid, crmIds,crmDetailEntities);
                 //更新memecache
-                batchUpdateMemcache( corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateMemcache( corpid, crmIds,crmDetailEntities);
                 break;
             case  DiaodanConstants.UPDATE_CRM_RELATION:
                 //更新t_crm_relation
-                dealupdateCrmRleationByCorpId( corpid, filterloseCrmds);
+                dealupdateCrmRleationByCorpId( corpid, crmIds);
                 //删除共享t_crm_share_relation
-                dealdeleteCrmShareRelation(corpid, filterloseCrmds);
+                dealdeleteCrmShareRelation(corpid, crmIds);
                 //删除公司关系 t_crm_corp_relation
-                deleteCrmCorpRelationCorpid( corpid, filterloseCrmds);
+                deleteCrmCorpRelationCorpid( corpid, crmIds);
                 //清除qq关系
-                cleanQQrelactionShip( corpid, filterloseCrmds);
+                cleanQQrelactionShip( corpid, crmIds);
                 //清楚销售计划
-                cleanCrmPan( corpid, filterloseCrmds);
+                cleanCrmPan( corpid, crmIds);
                 //写入变更记录log表
-                writeChangeLog(corpid, filterloseCrmds,crmDetailEntities);
+                writeChangeLog(corpid, crmIds,crmDetailEntities);
                 // 写ES
-                dealCrm2ES( corpid, filterloseCrmds);
+                dealCrm2ES( corpid, crmIds);
                 //  写轨迹
-                dealCrm2nsq(corpid, filterloseCrmds, crmDetailEntities);
+                dealCrm2nsq(corpid, crmIds, crmDetailEntities);
                 //更新上限值
-                batchUpdateCrmLimit(corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateCrmLimit(corpid, crmIds,crmDetailEntities);
                 //更新memecache
-                batchUpdateMemcache( corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateMemcache( corpid, crmIds,crmDetailEntities);
                 break;
             case DiaodanConstants.DELETE_SHARE_RELATION:
                 //删除共享t_crm_share_relation
-                dealdeleteCrmShareRelation(corpid, filterloseCrmds);
+                dealdeleteCrmShareRelation(corpid, crmIds);
                 //删除公司关系 t_crm_corp_relation
-                deleteCrmCorpRelationCorpid( corpid, filterloseCrmds);
+                deleteCrmCorpRelationCorpid(corpid, crmIds);
                 //清除qq关系
-                cleanQQrelactionShip( corpid, filterloseCrmds);
+                cleanQQrelactionShip(corpid, crmIds);
                 //清楚销售计划
-                cleanCrmPan( corpid, filterloseCrmds);
+                cleanCrmPan(corpid, crmIds);
                 //写入变更记录log表
-                writeChangeLog(corpid, filterloseCrmds,crmDetailEntities);
+                writeChangeLog(corpid, crmIds, crmDetailEntities);
                 // 写ES
-                dealCrm2ES( corpid, filterloseCrmds);
+                dealCrm2ES( corpid, crmIds);
                 //  写轨迹
-                dealCrm2nsq(corpid, filterloseCrmds, crmDetailEntities);
+                dealCrm2nsq(corpid, crmIds, crmDetailEntities);
                 //更新上限值
-                batchUpdateCrmLimit(corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateCrmLimit(corpid, crmIds,crmDetailEntities);
                 //更新memecache
-                batchUpdateMemcache( corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateMemcache( corpid, crmIds,crmDetailEntities);
                 break;
             case DiaodanConstants.DELETE_CRM_CORP_RELATION:
                 //删除公司关系 t_crm_corp_relation
-                deleteCrmCorpRelationCorpid( corpid, filterloseCrmds);
+                deleteCrmCorpRelationCorpid( corpid, crmIds);
                 //清除qq关系
-                cleanQQrelactionShip( corpid, filterloseCrmds);
+                cleanQQrelactionShip( corpid, crmIds);
                 //清楚销售计划
-                cleanCrmPan( corpid, filterloseCrmds);
+                cleanCrmPan( corpid, crmIds);
                 //写入变更记录log表
-                writeChangeLog(corpid, filterloseCrmds,crmDetailEntities);
+                writeChangeLog(corpid, crmIds,crmDetailEntities);
                 // 写ES
-                dealCrm2ES( corpid, filterloseCrmds);
+                dealCrm2ES( corpid, crmIds);
                 //  写轨迹
-                dealCrm2nsq(corpid, filterloseCrmds, crmDetailEntities);
+                dealCrm2nsq(corpid, crmIds, crmDetailEntities);
                 //更新上限值
-                batchUpdateCrmLimit(corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateCrmLimit(corpid, crmIds,crmDetailEntities);
                 //更新memecache
-                batchUpdateMemcache( corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateMemcache( corpid, crmIds,crmDetailEntities);
                 break;
             case DiaodanConstants.UPDATE_QQ:
                 //清除qq关系
-                cleanQQrelactionShip(corpid, filterloseCrmds);
+                cleanQQrelactionShip(corpid, crmIds);
                 //清楚销售计划
-                cleanCrmPan(corpid, filterloseCrmds);
+                cleanCrmPan(corpid, crmIds);
                 //写入变更记录log表
-                writeChangeLog(corpid, filterloseCrmds,crmDetailEntities);
+                writeChangeLog(corpid, crmIds,crmDetailEntities);
                 // 写ES
-                dealCrm2ES( corpid, filterloseCrmds);
+                dealCrm2ES( corpid, crmIds);
                 //  写轨迹
-                dealCrm2nsq(corpid, filterloseCrmds, crmDetailEntities);
+                dealCrm2nsq(corpid, crmIds, crmDetailEntities);
                 //更新上限值
-                batchUpdateCrmLimit(corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateCrmLimit(corpid, crmIds,crmDetailEntities);
                 //更新memecache
-                batchUpdateMemcache( corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateMemcache( corpid, crmIds,crmDetailEntities);
                 break;
             case DiaodanConstants.UPDATE_CRM_PLAN:
                 //清楚销售计划
-                cleanCrmPan(corpid, filterloseCrmds);
+                cleanCrmPan(corpid, crmIds);
                 //写入变更记录log表
-                writeChangeLog(corpid, filterloseCrmds,crmDetailEntities);
+                writeChangeLog(corpid, crmIds,crmDetailEntities);
                 // 写ES
-                dealCrm2ES( corpid, filterloseCrmds);
+                dealCrm2ES( corpid, crmIds);
                 //  写轨迹
-                dealCrm2nsq(corpid, filterloseCrmds, crmDetailEntities);
+                dealCrm2nsq(corpid, crmIds, crmDetailEntities);
                 //更新上限值
-                batchUpdateCrmLimit(corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateCrmLimit(corpid, crmIds,crmDetailEntities);
                 //更新memecache
-                batchUpdateMemcache( corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateMemcache( corpid, crmIds,crmDetailEntities);
                 break;
 
             case DiaodanConstants.UPDATE_CHANGE_LOG:
                 //写入变更记录log表
-                writeChangeLog(corpid, filterloseCrmds,crmDetailEntities);
+                writeChangeLog(corpid, crmIds,crmDetailEntities);
                 // 写ES
-                dealCrm2ES( corpid, filterloseCrmds);
+                dealCrm2ES( corpid, crmIds);
                 //  写轨迹
-                dealCrm2nsq(corpid, filterloseCrmds, crmDetailEntities);
+                dealCrm2nsq(corpid, crmIds, crmDetailEntities);
                 //更新上限值
-                batchUpdateCrmLimit(corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateCrmLimit(corpid, crmIds,crmDetailEntities);
                 //更新memecache
-                batchUpdateMemcache( corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateMemcache( corpid, crmIds,crmDetailEntities);
                 break;
             case DiaodanConstants.WRITE_ES:
                 // 写ES
-                dealCrm2ES( corpid, filterloseCrmds);
+                dealCrm2ES( corpid, crmIds);
                 //  写轨迹
-                dealCrm2nsq(corpid, filterloseCrmds, crmDetailEntities);
+                dealCrm2nsq(corpid, crmIds, crmDetailEntities);
                 //更新上限值
-                batchUpdateCrmLimit(corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateCrmLimit(corpid, crmIds,crmDetailEntities);
                 //更新memecache
-                batchUpdateMemcache( corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateMemcache( corpid, crmIds,crmDetailEntities);
                 break;
             case DiaodanConstants.WRITE_NSQ:
                 //  写轨迹
-                dealCrm2nsq(corpid, filterloseCrmds, crmDetailEntities);
+                dealCrm2nsq(corpid, crmIds, crmDetailEntities);
                 //更新上限值
-                batchUpdateCrmLimit(corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateCrmLimit(corpid, crmIds,crmDetailEntities);
                 //更新memecache
-                batchUpdateMemcache( corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateMemcache( corpid, crmIds,crmDetailEntities);
                 break;
             case DiaodanConstants.UPDATE_REDIS_LIMIT:
                 //更新上限值
-                batchUpdateCrmLimit(corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateCrmLimit(corpid, crmIds,crmDetailEntities);
                 //更新memecache
-                batchUpdateMemcache( corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateMemcache( corpid, crmIds,crmDetailEntities);
                 break;
             case DiaodanConstants.UPDATE_MEMCACHE:
                 //更新memecache
-                batchUpdateMemcache( corpid, filterloseCrmds,crmDetailEntities);
+                batchUpdateMemcache( corpid, crmIds,crmDetailEntities);
                 break;
             default:
                 throw new IllegalArgumentException("illegal stage .the stage is: " + stage);
