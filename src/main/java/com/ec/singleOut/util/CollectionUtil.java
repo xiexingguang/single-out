@@ -116,12 +116,14 @@ public class CollectionUtil {
 
     public static List<CrmDetailEntity> inCrmDetailNotIncontactTime(List<CrmDetailEntity> crmDetailEntities, List<CrmContactTimeEntity> crmContactTimeEntities) {
 
-        Map<Long, CrmDetailEntity> maps = new HashMap<>();
+        Map<Long, CrmContactTimeEntity> maps = new HashMap<>();
         List<CrmDetailEntity> crmDetailEntities1 = new ArrayList<CrmDetailEntity>();
-        for (CrmDetailEntity crmDetailEntity : crmDetailEntities) {
-            maps.put(crmDetailEntity.getF_crm_id(), crmDetailEntity);
-        }
         for (CrmContactTimeEntity crmContactTimeEntity : crmContactTimeEntities) {
+            maps.put(crmContactTimeEntity.getF_crm_id(), crmContactTimeEntity);
+        }
+
+        LOG.info("=======betww for============");
+        for (CrmDetailEntity crmDetailEntity : crmDetailEntities) {
            /* LOG.info("=======come in inCrmDetailNotIncontactTime=  for 2===========");
             long contactCrmId = crmContactTimeEntity.getF_crm_id();
             if (crmId == contactCrmId && !crmDetailEntities1.contains(crmDetailEntity)) {
@@ -129,9 +131,9 @@ public class CollectionUtil {
                 crmDetailEntities1.add(crmDetailEntity);
                 break;
             }*/
-            long crmid = crmContactTimeEntity.getF_crm_id();
-            if (maps.containsKey(crmid)) {
-                crmDetailEntities1.add(maps.get(crmid));
+            long crmid = crmDetailEntity.getF_crm_id();
+            if (!maps.containsKey(crmid)) {
+                crmDetailEntities1.add(crmDetailEntity);
             }
         }
 
@@ -152,9 +154,9 @@ public class CollectionUtil {
             }
         }*/
         LOG.info("=======go out come in inCrmDetailNotIncontactTime============");
-        crmDetailEntities.removeAll(crmDetailEntities1);
+       // crmDetailEntities.removeAll(crmDetailEntities1);
         LOG.info("=======after remove go out come in inCrmDetailNotIncontactTime============");
-        return crmDetailEntities;
+        return crmDetailEntities1;
     }
 
     /**
