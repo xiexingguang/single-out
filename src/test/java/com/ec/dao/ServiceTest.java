@@ -1,5 +1,6 @@
 package com.ec.dao;
 
+import com.alibaba.fastjson.JSON;
 import com.ec.singleOut.entity.CrmDetailEntity;
 import com.ec.singleOut.service.DiaodanService;
 import org.junit.Test;
@@ -32,7 +33,7 @@ public class ServiceTest {
         //5003740
    //     System.out.println("===============>size =======>"+diaodanService.searcherWillDeadLineDiaodanCrmIdByCorpId(0, 5009923).size());
        // System.out.println(JSON.toJSONString(diaodanService.searcherWillDeadLineDiaodanCrmIdByCorpId(0, 5003740),true));
-        List<CrmDetailEntity> crmDetailEntities = diaodanService.searcherWillDeadLineDiaodanCrmIdByCorpId(0, 59340);
+        List<CrmDetailEntity> crmDetailEntities = diaodanService.searcherWillDeadLineDiaodanCrmIdByCorpId(0, 5002277);
         System.out.println("size ====>" +crmDetailEntities.size());
         for (CrmDetailEntity crmDetailEntity : crmDetailEntities) {
             System.out.print(crmDetailEntity.getF_crm_id() + ",");
@@ -47,13 +48,13 @@ public class ServiceTest {
     public void testSearWillLoseCrmId() {
         List<CrmDetailEntity> crmDetailEntities = diaodanService.searcherWillDeadLineDiaodanCrmIdByCorpId(0, 59340);
         System.out.println("will crmid  ================ >>>" +  crmDetailEntities.size());
-       // System.out.println("will lose crm id " + JSON.toJSONString(crmDetailEntities, true));
+        System.out.println("will lose crm id " + JSON.toJSONString(crmDetailEntities, true));
     }
 
 
     @Test
     public void testDealLoseCrm() {
-        diaodanService.dealDeadLineDiaodanCrmIdByCorpId(59340);
+        diaodanService.dealDeadLineDiaodanCrmIdByCorpId(5003399);
     }
 
     @Test
@@ -69,6 +70,13 @@ public class ServiceTest {
 
 
     }
+
+    @Test
+    public void testPagehandle() {
+
+    }
+
+
 
     public static void main(String[] args) {
 

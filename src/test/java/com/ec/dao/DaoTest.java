@@ -80,6 +80,17 @@ public class DaoTest{
    @Autowired
     private DiaodanDao diaodanDao;
 
+    @Autowired
+    private CrmClassDao crmClassDao;
+
+    @Test
+    public void testCrmclass() {
+
+
+        System.out.println(JSON.toJSON(crmClassDao.findCorpClassIdByCorpId(60648L)));
+    }
+
+
     @Test
     public void testredisTemplate() {
         System.out.println(redisTemplate);
