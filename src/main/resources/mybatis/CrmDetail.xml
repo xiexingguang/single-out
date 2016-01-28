@@ -78,4 +78,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </update>
 
 
+    <select id="getUserUploadLimitCount" resultType="Integer">
+    <![CDATA[
+		SELECT count(1)
+		FROM d_ec_crm.t_eccrm_detail as d
+		JOIN d_ec_crm.t_crm_relation as r
+		ON r.f_crm_id=d.f_crm_id
+		WHERE r.f_corp_id=#{corpId} and r.f_user_id=#{userId} and d.f_step<4;
+		 ]]>
+    </select>
+
+
+
 </mapper>

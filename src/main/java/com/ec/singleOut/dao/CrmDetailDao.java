@@ -19,6 +19,9 @@ import java.util.Map;
 @Component
 public class CrmDetailDao extends  BaseDaoSupport {
 
+    private static String CORP_ID = "corpId";
+    private static String USER_ID = "userId";
+
     @Autowired
     private CorpVplanDao corpVplanDao;
 
@@ -69,6 +72,13 @@ public class CrmDetailDao extends  BaseDaoSupport {
         } else {
             return false;
         }
+    }
+
+    public int getUserUploadLimitCount(long corpId, long userId) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(CORP_ID, corpId);
+        map.put(USER_ID, userId);
+        return getCrmSqlSession(corpId).selectOne("crmDetail.getUserUploadLimitCount", map);
     }
 
 

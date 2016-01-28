@@ -1072,10 +1072,18 @@ public class DiaodanServiceImpl implements DiaodanService {
                 String limitKey = DiaodanConstants.CRM_RDIS_KEY + usr_id;
                 int size = value.size();
                 String oldSize = redisTemplate.get(limitKey, corpid);
+                String newValue = "";
+                if (oldSize == null) {
+                    int ooldSize = crmDetailDao.getUserUploadLimitCount(corpid, usr_id);
+                    oldSize = ooldSize + "";
+                    newValue = oldSize;
+                }else{
+                    newValue = Integer.parseInt(oldSize) + size +"";
+                }
                 LOG.info("【deal lose crimid】redis before "+ oldSize +"===============> key is :" + limitKey);
-                String newValue = Integer.parseInt(oldSize) + size +"";
                 LOG.info("【deal lose crimid】redis after "+ newValue);
                 redisTemplate.set(corpid, limitKey,newValue,Integer.MAX_VALUE);
+
             }
         } catch (Exception e) {
             LOG.error("fail to  update redis crm  limit  ,the corpId is" + corpid + ",the crmIds size is :" + crmIds.size(), e);
