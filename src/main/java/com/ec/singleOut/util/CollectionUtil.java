@@ -1,6 +1,5 @@
 package com.ec.singleOut.util;
 
-import com.alibaba.fastjson.JSON;
 import com.ec.singleOut.bean.Crmclass;
 import com.ec.singleOut.entity.CrmContactTimeEntity;
 import com.ec.singleOut.entity.CrmDetailEntity;
@@ -118,42 +117,17 @@ public class CollectionUtil {
 
         Map<Long, CrmContactTimeEntity> maps = new HashMap<>();
         List<CrmDetailEntity> crmDetailEntities1 = new ArrayList<CrmDetailEntity>();
+
         for (CrmContactTimeEntity crmContactTimeEntity : crmContactTimeEntities) {
             maps.put(crmContactTimeEntity.getF_crm_id(), crmContactTimeEntity);
         }
 
-        LOG.info("=======betww for============");
         for (CrmDetailEntity crmDetailEntity : crmDetailEntities) {
-           /* LOG.info("=======come in inCrmDetailNotIncontactTime=  for 2===========");
-            long contactCrmId = crmContactTimeEntity.getF_crm_id();
-            if (crmId == contactCrmId && !crmDetailEntities1.contains(crmDetailEntity)) {
-                LOG.info("=======come in inCrmDetailNotIncontactTime=  for if===========");
-                crmDetailEntities1.add(crmDetailEntity);
-                break;
-            }*/
             long crmid = crmDetailEntity.getF_crm_id();
             if (!maps.containsKey(crmid)) {
                 crmDetailEntities1.add(crmDetailEntity);
             }
         }
-
-
-     /*   LOG.info("=======come in inCrmDetailNotIncontactTime============");
-        List<CrmDetailEntity> crmDetailEntities1 = new ArrayList<CrmDetailEntity>();
-        for (CrmDetailEntity crmDetailEntity : crmDetailEntities) {
-            long crmId = crmDetailEntity.getF_crm_id();
-            LOG.info("=======come in inCrmDetailNotIncontactTime=  for 1===========");
-            for (CrmContactTimeEntity crmContactTimeEntity : crmContactTimeEntities) {
-                LOG.info("=======come in inCrmDetailNotIncontactTime=  for 2===========");
-                long contactCrmId = crmContactTimeEntity.getF_crm_id();
-                if (crmId == contactCrmId && !crmDetailEntities1.contains(crmDetailEntity)) {
-                    LOG.info("=======come in inCrmDetailNotIncontactTime=  for if===========");
-                    crmDetailEntities1.add(crmDetailEntity);
-                    break;
-                }
-            }
-        }*/
-        LOG.info("=======go out come in inCrmDetailNotIncontactTime============");
        // crmDetailEntities.removeAll(crmDetailEntities1);
         LOG.info("=======after remove go out come in inCrmDetailNotIncontactTime============");
         return crmDetailEntities1;
@@ -181,7 +155,6 @@ public class CollectionUtil {
                 }
             }
         }
-        System.out.println(JSON.toJSON(tagLists));
         return (String[]) tagLists.toArray(new String[tagLists.size()]);
     }
 

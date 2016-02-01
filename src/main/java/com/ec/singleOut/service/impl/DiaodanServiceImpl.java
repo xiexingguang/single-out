@@ -358,7 +358,7 @@ public class DiaodanServiceImpl implements DiaodanService {
             LOG.warn("corpId :" + corpid + ", have no lose crm ids");
             return;
         }
-        LOG.info("【deal  lose crimid】 ,企业 ：" + corpid + " 下 掉单的 客户数量为 ：" + crmDetailEntities.size() +"筛选符合掉单规则客户时间:"+(System.currentTimeMillis()-beginTime) +"毫秒");
+        LOG.info("【deal  lose crimid】 ,企业 ：" + corpid + " 下 掉单的 客户数量为 ：" + crmDetailEntities.size() +"筛选符合掉单规则客户时间："+(System.currentTimeMillis()-beginTime) +"毫秒");
 
         //日志 跟踪
        /* Map<Long*//**usr_id**//*, List<CrmDetailEntity>> map = CollectionUtil.generateUserIdWithCrmIds(crmDetailEntities);
@@ -612,7 +612,7 @@ public class DiaodanServiceImpl implements DiaodanService {
     public void dealDeadLineDiaodan() {
 
        final  List<CrmLoseRuleEntity> totalcCoprids = searcherSetDiaodanCorpIds();
-        LOG.info("【deal lose crimid】, 扫描设置的掉单企业数为 ：" + " size :" + totalcCoprids.size() + "detail info :" + JSON.toJSONString(totalcCoprids));
+        LOG.info("【deal lose crimid】, 扫描设置的掉单企业数为 ：" + " size ：" + totalcCoprids.size() + "：detail info ：" + JSON.toJSONString(totalcCoprids));
         List<CrmLoseRuleEntity> needRemove = new ArrayList<>();
       //  List<CrmLoseRuleEntity> testCoprids = new ArrayList<>();
         if(totalcCoprids!=null) {
@@ -721,7 +721,7 @@ public class DiaodanServiceImpl implements DiaodanService {
             udpClientSocket = new UDPClientSocket();
             //封装loseRecordEntity数据
            for (CrmLoseRuleEntity crmLoseRuleEntity : totalcCoprids) {
-                loseRecordEntities.clear();
+               loseRecordEntities.clear();
                 long corpid = crmLoseRuleEntity.getF_crop_id();
                 crmDetailEntities = searcherWillDeadLineDiaodanCrmIdByCorpId(48, corpid); // 即将调单的
                 if (crmDetailEntities == null) {
