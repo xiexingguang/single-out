@@ -235,7 +235,7 @@ public class DiaodanServiceImpl implements DiaodanService {
         }//end if
 
             // 如果掉单规则2，3有一个满足，则需要到contact_time表里查询
-            if (contact2 != 0 || updateNo != 0) {
+            if (contact2 != 0 ) {
                 //这里面查询出来的crmid,可能在
                 List<CrmContactTimeEntity> crmContactTimeEntities = crmContactTimeDao.findCrmOpearationTypeInEffecitiveCallWays(corpid, contact_type);
                 for (int i = 0; i < crmContactTimeEntities.size(); i++) {
@@ -245,17 +245,15 @@ public class DiaodanServiceImpl implements DiaodanService {
                     final  int type = crmContactTimeEntity.getF_type();
                     int effective_contactTime = 0;         // 规则中，未有效联系的天数
 
-                    if (type == DiaodanConstants.CONTATC_TYPE_UPDATECRM) { //如果是跟进客户
-                        effective_contactTime = updateNo;
-                    } else {
-                        effective_contactTime = contact2;
+                    if (type == 8) {
+                        continue;
                     }
-
+                    effective_contactTime = contact2;
                     final String lose_time = DateUtil.addDateOfDay(contactTime, effective_contactTime); // 调单时间
                     long day2lose = DateUtil.convertStringDate2LongDate(lose_time) - currentTime;
 
                     //log
-                    DEBUG.info("规则2，3  过滤 企业id ：" + corpid + " , 客户id为 ：" + crmContactTimeEntity.getF_crm_id() + "===========> 掉单时间 ==》" + lose_time);
+                    DEBUG.info("规则2, 过滤 企业id ：" + corpid + " , 客户id为 ：" + crmContactTimeEntity.getF_crm_id() + "===========> 掉单时间 ==》" + lose_time);
 
                     if (timeInterval != 0) {           // 查询的是即将timeInterval时间间隔掉单的crmId
                         final String rember_time = DateUtil.removeDateOfHour(lose_time, timeInterval);
@@ -282,6 +280,56 @@ public class DiaodanServiceImpl implements DiaodanService {
                     }
                 }
             }//end if contact2 != 0
+
+
+        if(updateNo != 0){
+            //这里面查询出来的crmid,可能在
+            List<CrmContactTimeEntity> crmContactTimeEntities = crmContactTimeDao.findCrmOpearationTypeInEffecitiveCallWays(corpid, contact_type);
+            for (int i = 0; i < crmContactTimeEntities.size(); i++) {
+                CrmContactTimeEntity crmContactTimeEntity = crmContactTimeEntities.get(i);
+                String contactTime = crmContactTimeEntity.getF_contact_time(); //客户最新操作时间
+                long crmid = crmContactTimeEntity.getF_crm_id();
+                final  int type = crmContactTimeEntity.getF_type();
+                int effective_contactTime = 0;         // 规则中，未有效联系的天数
+
+                if (type != 8) {
+                    continue;
+                }
+                effective_contactTime = updateNo;
+                final String lose_time = DateUtil.addDateOfDay(contactTime, effective_contactTime); // 调单时间
+                long day2lose = DateUtil.convertStringDate2LongDate(lose_time) - currentTime;
+
+                //log
+                DEBUG.info("规则 3  过滤 企业id ：" + corpid + " , 客户id为 ：" + crmContactTimeEntity.getF_crm_id() + "===========> 掉单时间 ==》" + lose_time);
+
+                if (timeInterval != 0) {           // 查询的是即将timeInterval时间间隔掉单的crmId
+                    final String rember_time = DateUtil.removeDateOfHour(lose_time, timeInterval);
+                    long intervalRember = currentTime - DateUtil.convertStringDate2LongDate(rember_time) ; //当前时间 - 提醒时间
+                    if (day2lose > 0) { // 表示还木有掉单
+                        if (intervalRember >=  0) {  //在指定的时间间隔内
+                            CrmDetailEntity crmDetailEntity = crmDetailDao.findCrmDetailByCorpIdAndCrmId(corpid, crmid); // 查询出来可能为null
+                            if(crmDetailEntity != null){
+                                crmDetailEntity.setF_lose_time(lose_time);
+                                crmDetailEntity.setF_new_contact_time(contactTime);
+                                crmDetailEntity.setF_type(type);
+                                crmDetailEntity.setF_user_id(crmDetailEntity.getF_user_id());
+                                crmDetailEntities.add(crmDetailEntity);
+                            }
+                        }
+                    }
+                } else { //查询已经掉单的
+                    if (day2lose < 0) {
+                        CrmDetailEntity crmDetailEntity = crmDetailDao.findCrmDetailByCorpIdAndCrmId(corpid, crmid);// 查询出来可能为null
+                        if (crmDetailEntity != null) {
+                            crmDetailEntities.add(crmDetailEntity);
+                        }
+                    }
+                }
+            }
+        }
+
+
+
         LOG.info("规则1，2，3  筛选 后 ， 企业id ：" + corpid  +  "符合条件的 crm-details  大小为：" + crmDetailEntities.size() );
 
         //企业下的，crmid 联系方式 全部是无效联系，只针对已掉单的，处理已掉单，在 contact_time表里，全部是无效的联系方式的crmid也需要掉单
