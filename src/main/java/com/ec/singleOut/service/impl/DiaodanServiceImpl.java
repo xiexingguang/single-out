@@ -234,10 +234,14 @@ public class DiaodanServiceImpl implements DiaodanService {
             }//end for
         }//end if
 
-            // 如果掉单规则2，3有一个满足，则需要到contact_time表里查询
+        List<CrmContactTimeEntity> crmContactTimeEntities = new ArrayList<>();
+        if (contact2 != 0 || updateNo != 0) {
+           crmContactTimeEntities = crmContactTimeDao.findCrmOpearationTypeInEffecitiveCallWays(corpid, contact_type);
+            LOG.info("查询符合企业掉单有效联系类型的contactTimeEntites 数量为 ：" + crmContactTimeEntities.size());
+        }
+
+        // 如果掉单规则2，3有一个满足，则需要到contact_time表里查询
             if (contact2 != 0 ) {
-                //这里面查询出来的crmid,可能在
-                List<CrmContactTimeEntity> crmContactTimeEntities = crmContactTimeDao.findCrmOpearationTypeInEffecitiveCallWays(corpid, contact_type);
                 for (int i = 0; i < crmContactTimeEntities.size(); i++) {
                     CrmContactTimeEntity crmContactTimeEntity = crmContactTimeEntities.get(i);
                     String contactTime = crmContactTimeEntity.getF_contact_time(); //客户最新操作时间
@@ -251,7 +255,6 @@ public class DiaodanServiceImpl implements DiaodanService {
                     effective_contactTime = contact2;
                     final String lose_time = DateUtil.addDateOfDay(contactTime, effective_contactTime); // 调单时间
                     long day2lose = DateUtil.convertStringDate2LongDate(lose_time) - currentTime;
-
                     //log
                     DEBUG.info("规则2, 过滤 企业id ：" + corpid + " , 客户id为 ：" + crmContactTimeEntity.getF_crm_id() + "===========> 掉单时间 ==》" + lose_time);
 
@@ -284,7 +287,6 @@ public class DiaodanServiceImpl implements DiaodanService {
 
         if(updateNo != 0){
             //这里面查询出来的crmid,可能在
-            List<CrmContactTimeEntity> crmContactTimeEntities = crmContactTimeDao.findCrmOpearationTypeInEffecitiveCallWays(corpid, contact_type);
             for (int i = 0; i < crmContactTimeEntities.size(); i++) {
                 CrmContactTimeEntity crmContactTimeEntity = crmContactTimeEntities.get(i);
                 String contactTime = crmContactTimeEntity.getF_contact_time(); //客户最新操作时间

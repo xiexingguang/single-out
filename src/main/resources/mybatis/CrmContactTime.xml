@@ -44,18 +44,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 
    <select id="findNewestCrmContactTime" resultMap="crmContactTime">
-    select  * from  ${tableName}
 
-    where f_contact_time in (select max(f_contact_time)
+       SELECT
+       f_crm_id, f_corp_id,f_type,	max(f_contact_time) f_contact_time
 
-    from ${tableName}
+       FROM
+
+       ${tableName}
+
+       WHERE
+       f_corp_id = #{corpId}
 
        <if test="type!=null and type!=''">
-           WHERE  f_type in ( ${type} )
+           and  f_type in ( ${type} )
        </if>
-       GROUP BY f_crm_id )
 
-    and f_corp_id = #{corpId} GROUP BY f_crm_id
+       GROUP BY
+       f_crm_id
 
 </select>
 
