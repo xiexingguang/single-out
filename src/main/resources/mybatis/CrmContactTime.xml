@@ -65,20 +65,5 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 </select>
 
 
-    <select id="findNotNewestCrmContactTime" resultMap="crmContactTime">
-        select  * from  ${tableName}
-
-        where f_contact_time in (select max(f_contact_time)
-
-        from ${tableName} GROUP BY f_crm_id )
-
-        <if test="type!=null and type!=''">
-            and  f_type not in ( ${type} )
-        </if>
-
-        and f_corp_id = #{corpId} GROUP BY f_crm_id
-
-    </select>
-
 
 </mapper>

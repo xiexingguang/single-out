@@ -1124,6 +1124,10 @@ public class DiaodanServiceImpl implements DiaodanService {
             }
             LOG.info("【deal lose crimid】 .begin to write Change log........... [coprid] " + corpId);
             List<CrmchangeLogEntity> changeLogs = CollectionUtil.convertLong2CrmChangeLog(crmIds, crmDetailEntities);
+            if (changeLogs == null || changeLogs.size() == 0) {
+                LOG.warn("【deal lose crimid】，fail 2 write change log , beacause the changeLogs size == 0");
+                return;
+            }
             crmChangeLogDao.updateCrmChangeLog(corpId, changeLogs);
             crmChangeOnceDao.updateCrmChangeOnce(corpId, changeLogs);
             crmChangeDao.updateCrmChange(corpId, changeLogs);
