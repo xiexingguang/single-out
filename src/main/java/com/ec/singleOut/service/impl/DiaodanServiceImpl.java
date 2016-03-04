@@ -706,8 +706,6 @@ public class DiaodanServiceImpl implements DiaodanService {
         //线程，异步处理。拿到corpids,批量处理
         new Thread(new Runnable() {
             public void run() {
-
-
                 dealDeadLineDiaodanCrmIdsByCorpIds(totalcCoprids, new TaskCallBack() {
                     public void notifyTaskTheResultOfcallService(TaskEntity entity) {
                         try {

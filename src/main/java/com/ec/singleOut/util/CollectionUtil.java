@@ -129,7 +129,6 @@ public class CollectionUtil {
             }
         }
        // crmDetailEntities.removeAll(crmDetailEntities1);
-        LOG.info("=======after remove go out come in inCrmDetailNotIncontactTime============");
         return crmDetailEntities1;
     }
 
